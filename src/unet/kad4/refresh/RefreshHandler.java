@@ -1,7 +1,6 @@
 package unet.kad4.refresh;
 
 import unet.kad4.Kademlia;
-import unet.kad4.operations.inter.Operation;
 import unet.kad4.refresh.tasks.inter.Task;
 
 import java.lang.reflect.InvocationTargetException;

@@ -70,6 +70,13 @@ public class Kademlia {
         //refresh.addOperation(new StaleRefresh(server));
         //new RPCHandler()
         //dht = new KDHT(server);
+        routingTable.addRestartListener(new RoutingTable.RestartListener(){
+            @Override
+            public void onRestart(){
+                new BucketRefreshTask(Kademlia.this).execute();
+            }
+        });
+
         eventListeners = new HashMap<>();
         messages = new HashMap<>();
 
