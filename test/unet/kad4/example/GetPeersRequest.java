@@ -3,11 +3,11 @@ package unet.kad4.example;
 import unet.kad4.libs.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.*;
 
-@Message(method = "GET_PEERS", type = MessageType.REQ_MSG)
+@Message(method = "get_peers", type = MessageType.REQ_MSG)
 public class GetPeersRequest extends MessageBase {
 
     public GetPeersRequest(byte[] tid){
-        super(tid);//, null, null);
+        super(tid);
     }
 
     @Override
