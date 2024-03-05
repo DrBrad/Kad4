@@ -9,11 +9,103 @@ import unet.kad4.routing.kb.KBucket;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.EventHandler;
+import unet.kad4.utils.Node;
+import unet.kad4.utils.UID;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KEventListener extends EventListener {
 
     public KEventListener(Kademlia kademlia){
         super(kademlia);
+    }
+
+    @EventHandler
+    public void onBucketRefresh(){
+        List<Node> queries = new ArrayList<>();
+
+        for(int i = 1; i < UID.ID_LENGTH; i++){
+            if(getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
+                final UID k = getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
+
+                final List<Node> closest = getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
+                if(!closest.isEmpty()){
+                    for(Node n : closest){
+                        FindNodeRequest request = new FindNodeRequest();
+                        request.setDestination(n.getAddress());
+                        request.setTarget(k);
+
+                        /*
+                        server.send(new Call(request, new MessageCallback(){
+                            @Override
+                            public void onResponse(MessageBase message){
+                                if(!n.getUID().equals(message.getUID())){
+                                    return;
+                                }
+
+                                n.setSeen();
+
+                                System.out.println("SEEN FN "+message.getOrigin());
+                                FindNodeResponse r = (FindNodeResponse) message;
+
+                                //queries.addAll(r.getAllNodes());
+
+                                List<Node> nodes = r.getAllNodes();
+                                for(int i = nodes.size()-1; i > -1; i--){
+                                    if(queries.contains(nodes.get(i))){
+                                        nodes.remove(nodes.get(i));
+                                    }
+                                }
+
+                                /*
+                                //queries.addAll(nodes);
+                                for(Node n : r.getAllNodes()){
+                                    server.getRoutingTable().insert(n);
+                                    n.markStale();
+                                }
+
+                                new PingOperation(server, r.getAllNodes()).run();
+                                *./
+                                queries.addAll(nodes);
+
+                                new PingOperation(server, nodes).run();
+                            }
+
+                            @Override
+                            public void onErrorResponse(ErrorMessage message){
+                                if(!n.getUID().equals(message.getUID())){
+                                    return;
+                                }
+
+                                n.setSeen();
+                                System.err.println("Node sent error message: "+message.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
+                            }
+
+                            /*
+                            @Override
+                            public void onException(MessageException exception){
+                                n.setSeen();
+                                exception.printStackTrace();
+                            }
+                            *./
+
+                            @Override
+                            public void onStalled(){
+                                n.markStale();
+                                System.err.println("Node stalled: "+n);
+                            }
+                        }));
+                        */
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onStaleRefresh(){
+
     }
 
     @EventHandler(method = "ping", type = MessageType.REQ_MSG)

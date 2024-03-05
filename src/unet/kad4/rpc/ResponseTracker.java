@@ -1,6 +1,7 @@
 package unet.kad4.rpc;
 
 import unet.kad4.rpc.events.RequestEvent;
+import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.utils.ByteWrapper;
 
 import java.util.LinkedHashMap;
@@ -52,7 +53,12 @@ public class ResponseTracker {
             }
 
             calls.remove(tid);
-            //call.getMessageCallback().onStalled();
+
+            if(event.hasResponseCallback()){
+                StalledEvent e = new StalledEvent(event.getMessage());
+                e.setSentTime(event.getSentTime());
+                event.getResponseCallback().onStalled(e);
+            }
         }
         /*
         for(ByteWrapper tid : callsOrder){

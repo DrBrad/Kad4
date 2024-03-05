@@ -8,7 +8,7 @@ import static unet.kad4.rpc.ResponseTracker.STALLED_TIME;
 public class MessageEvent extends Event {
 
     protected MessageBase message;
-    //protected Node node;
+    protected Node node;
     protected long sentTime, receivedTime;
 
     public MessageEvent(MessageBase message){
@@ -19,7 +19,6 @@ public class MessageEvent extends Event {
         return message;
     }
 
-    /*
     public boolean hasNode(){
         return (node != null);
     }
@@ -31,7 +30,6 @@ public class MessageEvent extends Event {
     public Node getNode(){
         return node;
     }
-    */
 
     public void setSentTime(long sentTime){
         this.sentTime = sentTime;

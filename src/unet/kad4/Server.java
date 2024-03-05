@@ -12,6 +12,7 @@ import unet.kad4.rpc.events.inter.MessageEvent;
 import unet.kad4.utils.ByteWrapper;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.ReflectMethod;
+import unet.kad4.utils.UID;
 import unet.kad4.utils.net.AddressUtils;
 
 import java.io.IOException;
@@ -177,9 +178,12 @@ public class Server {
                             return;
                         }
 
+                        Node node = new Node(m.getUID(), m.getOrigin());
+                        kademlia.routingTable.insert(node);
+
                         RequestEvent event = new RequestEvent(m);
                         event.received();
-                        kademlia.routingTable.insert(new Node(m.getUID(), m.getOrigin()));
+                        event.setNode(node);
                         //event.setResponse(messages.get(new MessageKey(ben.getString(t.getRPCTypeName()), Type.RSP_MSG)).newInstance(ben.getBytes(TID_KEY)));
 
                         for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
@@ -223,16 +227,9 @@ public class Server {
 
                         ResponseEvent event = new ResponseEvent(m);
                         event.received();
+                        event.setNode(new Node(m.getUID(), m.getOrigin()));
                         event.setSentTime(req.getSentTime());
                         event.setRequest(req.getMessage());
-
-                        /*
-                        if(req.hasNode()){
-                            event.setNode(req.getNode());
-                        }else{
-                            event.setNode(new Node(m.getUID(), m.getOrigin()));
-                        }
-                        */
 
                         //System.out.println(k.getMethod()+"  "+k.getType());
 
@@ -240,6 +237,12 @@ public class Server {
                             //System.out.println(r.getMethod().getName()+"  "+r.getMethod().getParameters()[0].getType().getSimpleName());
                             r.getMethod().invoke(r.getInstance(), event);
                         }
+
+                        /*
+                        if(kademlia.eventListeners.containsKey(new EventKey("*"))){
+
+                        }
+                        */
 
                         if(req.hasResponseCallback()){
                             req.getResponseCallback().onResponse(event);

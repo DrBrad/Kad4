@@ -60,6 +60,9 @@ public class Main {
     Make the decode better
 
     Can we handle the stalling better...?
+
+    Bring bind back
+    FindNodeResponse fix
     */
 
     public static void main(String[] args){

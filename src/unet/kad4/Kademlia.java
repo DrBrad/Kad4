@@ -93,7 +93,6 @@ public class Kademlia {
         EventListener e = (EventListener) c.getDeclaredConstructor(Kademlia.class).newInstance(this);
 
         for(Method method : c.getDeclaredMethods()){
-        //for(Method method : c.getDeclaredMethods()){
             if(method.isAnnotationPresent(EventHandler.class)){
                 Parameter[] parameters = method.getParameters();
 
@@ -147,6 +146,8 @@ public class Kademlia {
     }
 
     public void join(int localPort, Node node)throws IOException {
+        join(localPort, node.getAddress());
+        /*
         if(!server.isRunning()){
             server.start(localPort);
         }
@@ -166,6 +167,7 @@ public class Kademlia {
         });
 
         server.send(event); //WHAT ABOUT REFRESH... WE NEED A CALLBACK...
+        */
     }
 
     public void join(int localPort, InetSocketAddress address)throws IOException {
@@ -182,9 +184,12 @@ public class Kademlia {
         event.setResponseCallback(new ResponseCallback(){
             @Override
             public void onResponse(ResponseEvent event){
-                routingTable.insert(new Node(event.getMessage().getUID(), event.getMessage().getOrigin()));
+                routingTable.insert(event.getNode());
 
                 System.out.println("INSERTED NODE");
+                if(!refresh.isRunning()){
+                    refresh.start();
+                }
             }
         });
 
