@@ -1,7 +1,10 @@
-package unet.kad4.rpc;
+package unet.kad4.refresh;
 
+import unet.kad4.Kademlia;
 import unet.kad4.operations.inter.Operation;
+import unet.kad4.refresh.tasks.inter.Task;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -9,14 +12,16 @@ import java.util.TimerTask;
 
 public class RefreshHandler {
 
+    private Kademlia kademlia;
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
-    private List<Operation> operations;
+    private List<Task> tasks;
     //private long refreshTime = 30000;
     private long refreshTime = 3600000;
 
-    public RefreshHandler(){
-        operations = new ArrayList<>();
+    public RefreshHandler(Kademlia kademlia){
+        this.kademlia = kademlia;
+        tasks = new ArrayList<>();
     }
 
     public boolean isRunning(){
@@ -35,8 +40,8 @@ public class RefreshHandler {
                 @Override
                 public void run(){
                     System.out.println("STARTING REFRESH");
-                    for(Operation operation : operations){
-                        operation.run();
+                    for(Task task : tasks){
+                        task.execute();
                     }
 
                     /*
@@ -112,19 +117,23 @@ public class RefreshHandler {
         refreshTime = time;
     }
 
-    public void addOperation(Operation operation){
-        operations.add(operation);
+    public void addOperation(Class<?> c)throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        if(!c.getSuperclass().equals(Task.class)){
+            throw new IllegalArgumentException("Class '"+c.getSimpleName()+"' isn't a super of 'Task'");
+        }
+
+        tasks.add((Task) c.getDeclaredConstructor(Kademlia.class).newInstance(kademlia));
     }
 
-    public boolean removeOperation(Operation operation){
-        return operations.remove(operation);
+    public boolean removeOperation(Task task){
+        return tasks.remove(task);
     }
 
-    public Operation getOperation(int i){
-        return operations.get(i);
+    public Task getOperation(int i){
+        return tasks.get(i);
     }
 
-    public boolean containsOperation(Operation operation){
-        return operations.contains(operation);
+    public boolean containsOperation(Task task){
+        return tasks.contains(task);
     }
 }

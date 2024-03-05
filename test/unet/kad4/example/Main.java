@@ -1,6 +1,7 @@
 package unet.kad4.example;
 
 import unet.kad4.Kademlia;
+import unet.kad4.refresh.tasks.BucketRefreshTask;
 import unet.kad4.rpc.EventListener;
 import unet.kad4.rpc.KEventListener;
 import unet.kad4.rpc.events.inter.EventHandler;
@@ -72,7 +73,6 @@ public class Main {
             //k.registerEventListener(ReceiverListener.class);
             //k.registerMessage(GetPeersRequest.class);
             k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
-
 
 
 

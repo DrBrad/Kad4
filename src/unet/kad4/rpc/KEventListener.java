@@ -4,16 +4,19 @@ import unet.kad4.Kademlia;
 import unet.kad4.messages.FindNodeRequest;
 import unet.kad4.messages.FindNodeResponse;
 import unet.kad4.messages.PingResponse;
-import unet.kad4.messages.inter.MessageType;
 import unet.kad4.routing.kb.KBucket;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
+import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.rpc.events.inter.EventHandler;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.UID;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static unet.kad4.messages.inter.MessageType.REQ_MSG;
+import static unet.kad4.messages.inter.MessageType.RSP_MSG;
 
 public class KEventListener extends EventListener {
 
@@ -104,11 +107,11 @@ public class KEventListener extends EventListener {
     }
 
     @EventHandler
-    public void onStaleRefresh(){
+    public void onStalled(StalledEvent event){
 
     }
 
-    @EventHandler(method = "ping", type = MessageType.REQ_MSG)
+    @EventHandler(method = "ping", type = REQ_MSG)
     public void onPingRequest(RequestEvent event){
         if(event.isPreventDefault()){
             return;
@@ -120,12 +123,12 @@ public class KEventListener extends EventListener {
         event.setResponse(response);
     }
 
-    @EventHandler(method = "ping", type = MessageType.RSP_MSG)
+    @EventHandler(method = "ping", type = RSP_MSG)
     public void onPingResponse(ResponseEvent event){
         //getRoutingTable().insert(event.getNode());
     }
 
-    @EventHandler(method = "find_node", type = MessageType.REQ_MSG)
+    @EventHandler(method = "find_node", type = REQ_MSG)
     public void onFindNodeRequest(RequestEvent event){
         FindNodeRequest request = (FindNodeRequest) event.getMessage();
 
@@ -134,7 +137,7 @@ public class KEventListener extends EventListener {
         event.setResponse(response);
     }
 
-    @EventHandler(method = "find_node", type = MessageType.RSP_MSG)
+    @EventHandler(method = "find_node", type = RSP_MSG)
     public void onFindNodeResponse(ResponseEvent event){
         FindNodeResponse response = (FindNodeResponse) event.getMessage();
         //getRoutingTable().insert(event.getNode());

@@ -7,11 +7,13 @@ import unet.kad4.messages.PingResponse;
 import unet.kad4.messages.inter.Message;
 import unet.kad4.messages.inter.MessageBase;
 import unet.kad4.messages.inter.MessageKey;
+import unet.kad4.refresh.tasks.BucketRefreshTask;
+import unet.kad4.refresh.tasks.StaleRefreshTask;
 import unet.kad4.routing.BucketTypes;
 import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.rpc.EventListener;
 import unet.kad4.rpc.KEventListener;
-import unet.kad4.rpc.RefreshHandler;
+import unet.kad4.refresh.RefreshHandler;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.EventKey;
@@ -62,14 +64,13 @@ public class Kademlia {
         this.routingTable = routingTable;
         System.out.println("Starting with bucket type: "+routingTable.getClass().getSimpleName());
         server = new Server(this);
-        refresh = new RefreshHandler();
+        refresh = new RefreshHandler(this);
         //refresh.addOperation(new BucketRefresh(server));
         //refresh.addOperation(new StaleRefresh(server));
         //new RPCHandler()
         //dht = new KDHT(server);
         eventListeners = new HashMap<>();
         messages = new HashMap<>();
-
 
         try{
             registerEventListener(KEventListener.class);
@@ -78,6 +79,9 @@ public class Kademlia {
             registerMessage(PingResponse.class);
             registerMessage(FindNodeRequest.class);
             registerMessage(FindNodeResponse.class);
+
+            refresh.addOperation(BucketRefreshTask.class);
+            refresh.addOperation(StaleRefreshTask.class);
 
         }catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
@@ -141,6 +145,10 @@ public class Kademlia {
         return routingTable;
     }
 
+    public RefreshHandler getRefreshHandler(){
+        return refresh;
+    }
+
     public void join(int localPort, InetAddress address, int port)throws IOException {
         join(localPort, new InetSocketAddress(address, port));
     }
@@ -186,7 +194,14 @@ public class Kademlia {
             public void onResponse(ResponseEvent event){
                 routingTable.insert(event.getNode());
 
-                System.out.println("INSERTED NODE");
+                FindNodeResponse response = (FindNodeResponse) event.getMessage();
+
+                if(response.hasNodes()){
+                    for(Node n : response.getAllNodes()){
+                        System.out.println(n);
+                    }
+                }
+
                 if(!refresh.isRunning()){
                     refresh.start();
                 }
