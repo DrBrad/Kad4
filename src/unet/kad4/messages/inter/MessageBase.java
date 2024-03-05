@@ -187,7 +187,7 @@ public class MessageBase {
     public BencodeObject encode(){
         BencodeObject ben = new BencodeObject();
 
-        ben.put("t", tid); //TRANSACTION ID
+        ben.put(TID_KEY, tid); //TRANSACTION ID
         ben.put("v", VERSION_CODE); //VERSION
 
         ben.put(MessageType.TYPE_KEY, message.type().getRPCTypeName());

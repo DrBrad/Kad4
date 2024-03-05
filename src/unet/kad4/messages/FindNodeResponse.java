@@ -56,6 +56,13 @@ public class FindNodeResponse extends MessageBase {
         */
     }
 
+    public void addNodes(List<Node> nodes){
+
+    }
+
+    public List<Node> getAllNodes(){
+        return null;
+    }
     /*
     public void addNode(Node node){
         if(node.getHostAddress() instanceof Inet4Address){

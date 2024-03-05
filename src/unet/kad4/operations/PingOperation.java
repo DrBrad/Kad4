@@ -1,15 +1,5 @@
 package unet.kad4.operations;
 
-import unet.kad4.messages.ErrorMessage;
-import unet.kad4.messages.PingRequest;
-import unet.kad4.messages.inter.MessageBase;
-import unet.kad4.messages.inter.MessageCallback;
-import unet.kad4.operations.inter.Operation;
-import unet.kad4.rpc.RPCServer;
-import unet.kad4.utils.Node;
-
-import java.util.List;
-
 public class PingOperation {/*implements Operation {
 
     private RPCServer server;

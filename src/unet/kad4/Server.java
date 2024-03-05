@@ -1,17 +1,19 @@
-package unet.kad4.rpc;
+package unet.kad4;
 
+import unet.kad4.Kademlia;
 import unet.kad4.libs.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.*;
 import unet.kad4.routing.inter.RoutingTable;
+import unet.kad4.rpc.ResponseTracker;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
-import unet.kad4.rpc.events.inter.Event;
+import unet.kad4.rpc.events.inter.EventKey;
 import unet.kad4.rpc.events.inter.MessageEvent;
 import unet.kad4.utils.ByteWrapper;
+import unet.kad4.utils.Node;
 import unet.kad4.utils.net.AddressUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;
@@ -19,14 +21,11 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static unet.kad4.messages.inter.MessageBase.TID_KEY;
 
-public class RPCServer {
+public class Server {
 
     public static final int MAX_ACTIVE_CALLS = 512, TID_LENGTH = 6;
 
@@ -34,21 +33,20 @@ public class RPCServer {
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
 
     private SecureRandom random;
-    protected final RoutingTable routingTable;
+    protected final Kademlia kademlia;
     private ResponseTracker tracker;
     //protected final RPCReceiver receiver;
-    protected final Map<MessageKey, List<Method>> receivers;
-    protected final Map<MessageKey, /*Class<MessageBase>*/Constructor<MessageBase>> messages;
+    //protected final Map<MessageKey, List<Method>> receivers;
+    //protected final Map<MessageKey, /*Class<MessageBase>*/Constructor<MessageBase>> messages;
     //protected final Map<MessageKey, Class> encoders, decoders;
 
-    public RPCServer(RoutingTable routingTable){
-        this.routingTable = routingTable;
+    public Server(Kademlia kademlia){
+        this.kademlia = kademlia;
         tracker = new ResponseTracker();
         //receiver = new RPCReceiver(this);
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
-        receivers = new HashMap<>();
-        messages = new HashMap<>();
+
 
         //encoders = new HashMap<>();
         //decoders = new HashMap<>();
@@ -59,7 +57,7 @@ public class RPCServer {
             e.printStackTrace();
         }
 
-        routingTable.addRestartListener(new RoutingTable.RestartListener(){
+        kademlia.routingTable.addRestartListener(new RoutingTable.RestartListener(){
             @Override
             public void onRestart(){
                 System.out.println("RESTART");
@@ -113,7 +111,7 @@ public class RPCServer {
                     */
 
                     //removeStalled();
-                    tracker.removeStalled();
+                    //tracker.removeStalled();
                 }
             }
         }).start();
@@ -144,18 +142,6 @@ public class RPCServer {
     }
     */
 
-    public RoutingTable getRoutingTable(){
-        //System.out.println(routingTable.getConsensusExternalAddress().getHostAddress()+"  "+routingTable.getAllNodes().size());
-        return routingTable;
-    }
-
-    public void addMessage(Class<MessageBase> message)throws NoSuchMethodException {
-        if(!message.isAnnotationPresent(Message.class)){
-            //throw new Ann
-        }
-        messages.put(new MessageKey(message.getAnnotation(Message.class)), message.getDeclaredConstructor(byte[].class));
-    }
-
     private void onReceive(DatagramPacket packet){
         if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
@@ -178,21 +164,26 @@ public class RPCServer {
             switch(t){
                 case REQ_MSG: {
                         MessageKey k = new MessageKey(ben.getString(t.getRPCTypeName()), t);
-                        if(!messages.containsKey(k)){
+                        if(!kademlia.messages.containsKey(k)){
                             return;
                         }
 
-                        MessageBase m = messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(ben.getBytes(TID_KEY));//.decode(ben);
+                        MessageBase m = (MessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(ben.getBytes(TID_KEY));//.decode(ben);
                         m.decode(ben); //ERROR THROW - SEND ERROR MESSAGE
+                        m.setOrigin(packet.getAddress(), packet.getPort());
 
-                        if(!receivers.containsKey(k)){
+                        if(!kademlia.eventListeners.containsKey(k)){
                             return;
                         }
 
-                        RequestEvent event = new RequestEvent(m);
+                        RequestEvent event = new RequestEvent(m, new Node(m.getUID(), m.getOrigin()));
+                        event.received();
+                        event.setServer(this);
+                        event.setRoutingTable(kademlia.routingTable);
+                        kademlia.routingTable.insert(event.getNode());
                         //event.setResponse(messages.get(new MessageKey(ben.getString(t.getRPCTypeName()), Type.RSP_MSG)).newInstance(ben.getBytes(TID_KEY)));
 
-                        for(Method r : receivers.get(k)){
+                        for(Method r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
                             r.invoke(event); //THROW ERROR - SEND ERROR MESSAGE
                         }
 
@@ -214,25 +205,40 @@ public class RPCServer {
                         //VERIFY ADDRESS AND PORT ARE ACCURATE...
 
                         MessageKey k = new MessageKey(req.getMessage().getMethod(), t);
-                        if(!messages.containsKey(k)){
+                        if(!kademlia.messages.containsKey(k)){
                             return;
                         }
 
-                        MessageBase m = messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
+                        MessageBase m = (MessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
                         m.decode(ben);
+                        m.setOrigin(packet.getAddress(), packet.getPort());
 
                         //!req.getMessage().getUID().equals(m.getUID()) - THAT WOULDNT MATCH UP...
                         if(!req.getMessage().getDestination().equals(m.getOrigin())){
                             return;
                         }
 
+                        if(req.hasNode() && !req.getNode().getUID().equals(m.getUID())){
+                            return;
+                        }
+
                         ResponseEvent event = new ResponseEvent(m);
                         event.received();
-                        event.setNode(req.getNode());
+
+                        event.setServer(this);
+                        event.setRoutingTable(kademlia.routingTable);
                         event.setSentTime(req.getSentTime());
                         event.setRequest(req.getMessage());
 
-                        for(Method r : receivers.get(k)){
+                        if(req.hasNode()){
+                            event.setNode(req.getNode());
+                        }else{
+                            event.setNode(new Node(m.getUID(), m.getOrigin()));
+                        }
+
+                        System.out.println(k.getMethod()+"  "+k.getType());
+
+                        for(Method r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
                             r.invoke(event);
                         }
 
@@ -378,8 +384,6 @@ public class RPCServer {
     }
 
     public void send(MessageEvent event)throws IOException {
-        event.getMessage().setUID(routingTable.getDerivedUID());
-
         if(event instanceof RequestEvent){
             byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
             event.getMessage().setTransactionID(tid);
@@ -411,102 +415,11 @@ public class RPCServer {
             throw new IllegalArgumentException("Message destination set to null");
         }
 
+        message.setUID(kademlia.routingTable.getDerivedUID());
+
         byte[] data = message.encode().encode();
-        DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestination());
-
-        server.send(packet);
+        server.send(new DatagramPacket(data, 0, data.length, message.getDestination()));
     }
-
-    /*
-    public void send(MessageBase message){
-        switch(message.getType()){
-            case REQ_MSG:
-                throw new IllegalArgumentException("Request messages require a callback");
-
-            case RSP_MSG:
-            case ERR_MSG:
-
-                break;
-        }
-    }
-
-    public void send(MessageBase message, MessageCallback callback){
-        switch(message.getType()){
-            case REQ_MSG:
-
-            case RSP_MSG:
-            case ERR_MSG:
-                throw new IllegalArgumentException("Only request messages can have a callback");
-        }
-
-        try{
-            if(message.getDestination() == null){
-                throw new IllegalArgumentException("Message destination set to null");
-            }
-
-            message.setUID(routingTable.getDerivedUID());
-
-            switch(message.getType()){
-                case REQ_MSG:
-                    byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-                    message.setTransactionID(tid);
-
-                    RequestEvent event = new RequestEvent(message);
-                    event.sent();
-                    tracker.add(new ByteWrapper(tid), event);
-                    break;
-            }
-
-            byte[] data = message.encode().encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestination());
-
-            server.send(packet);
-            /*
-            call.getMessage().setUID(routingTable.getDerivedUID());
-
-            switch(call.getMessage().getType()){
-                case REQ_MSG:
-                    byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-                    call.getMessage().setTransactionID(tid);
-                    ((RPCRequestCall) call).sent();
-                    ByteWrapper wrapper = new ByteWrapper(tid);
-                    callsOrder.add(wrapper);
-                    calls.put(wrapper, (RPCRequestCall) call);
-                    break;
-            }
-
-            byte[] data = call.getMessage().encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
-
-            server.send(packet);
-            *./
-
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-    }
-    */
-
-    /*
-    private void removeStalled(){
-        long now = System.currentTimeMillis();
-        //for(int i = calls.size()-1; i > -1; i--){
-        //for(ByteWrapper tid : calls.keySet()){
-        //for(int i = 0; i < calls.size(); i++){
-        for(ByteWrapper tid : callsOrder){
-            Call call = calls.get(tid);
-            if(!call.isStalled(now)){
-                break;
-            }
-
-            callsOrder.remove(tid);
-            calls.remove(tid);
-            call.getMessageCallback().onStalled();
-
-            //call.getMessageCallback().onResponse(call.getMessage());
-        }
-    }
-    */
 
     //DONT INIT EVERY TIME...
     private byte[] generateTransactionID(){

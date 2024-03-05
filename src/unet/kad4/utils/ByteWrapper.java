@@ -19,6 +19,9 @@ public class ByteWrapper {
 
     @Override
     public boolean equals(Object obj){
-        return obj instanceof ByteWrapper && Arrays.equals(b, ((ByteWrapper)obj).b);
+        if(obj instanceof ByteWrapper){
+            return Arrays.equals(b, ((ByteWrapper)obj).b);
+        }
+        return false;
     }
 }

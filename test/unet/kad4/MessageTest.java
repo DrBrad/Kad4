@@ -1,20 +1,9 @@
 package unet.kad4;
 
-import unet.kad4.messages.*;
-import unet.kad4.messages.MessageDecoder;
-import unet.kad4.messages.inter.MessageBase;
 import unet.kad4.messages.inter.MessageException;
-import unet.kad4.utils.Node;
 import unet.kad4.utils.UID;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-
-import static unet.kad4.rpc.RPCServer.TID_LENGTH;
 
 public class MessageTest {
 

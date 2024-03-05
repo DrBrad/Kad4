@@ -1,5 +1,9 @@
 package unet.kad4.messages.inter;
 
+import unet.kad4.utils.ByteWrapper;
+
+import java.util.Arrays;
+
 public class MessageKey {
 
     private String method;
@@ -29,5 +33,18 @@ public class MessageKey {
 
     public MessageType getType(){
         return type;
+    }
+
+    @Override
+    public int hashCode(){
+        return method.hashCode()+type.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj instanceof MessageKey){
+            return method.equals(((MessageKey) obj).method) && type.equals(((MessageKey) obj).type);
+        }
+        return false;
     }
 }
