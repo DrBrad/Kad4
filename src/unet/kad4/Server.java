@@ -221,12 +221,18 @@ public class Server {
                             return;
                         }
 
-                        //if(req.hasNode() && !req.getNode().getUID().equals(m.getUID())){
-                        //    return;
-                        //}
-
                         ResponseEvent event = new ResponseEvent(m);
                         event.received();
+
+                        if(req.hasNode()){
+                            if(!req.getNode().getUID().equals(m.getUID())){
+                                return;
+                            }
+                            event.setNode(req.getNode());
+                        }else{
+                            event.setNode(new Node(m.getUID(), m.getOrigin()));
+                        }
+
                         event.setNode(new Node(m.getUID(), m.getOrigin()));
                         event.setSentTime(req.getSentTime());
                         event.setRequest(req.getMessage());

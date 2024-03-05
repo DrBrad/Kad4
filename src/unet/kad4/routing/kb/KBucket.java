@@ -56,6 +56,16 @@ public class KBucket {
         return nodes.stream().anyMatch(c -> c.verify(n)) || cache.stream().anyMatch(c -> c.verify(n));
     }
 
+    //IN THE CASE OF RESPONSE NODES - SAME NODE BUT NOT SAME VARIABLE
+    public synchronized boolean hasQueried(Node n, long now){
+        for(Node c : nodes){
+            if(c.equals(n)){
+                return c.hasQueried(now);
+            }
+        }
+        return false;
+    }
+
     public List<Node> getAllNodes(){
         //nodes.sort(new LSComparetor());
         return nodes;

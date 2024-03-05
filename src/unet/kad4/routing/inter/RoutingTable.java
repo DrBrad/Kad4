@@ -45,6 +45,7 @@ public abstract class RoutingTable {
         return nodes;
     }
     */
+    public abstract boolean hasQueried(Node node, long now);
 
     public abstract int getBucketUID(UID k);
 

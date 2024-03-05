@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +88,6 @@ public class Kademlia {
             e.printStackTrace();
         }
     }
-
 
     public void registerEventListener(Class<?> c)throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         if(!c.getSuperclass().equals(EventListener.class)){
@@ -197,8 +197,24 @@ public class Kademlia {
                 FindNodeResponse response = (FindNodeResponse) event.getMessage();
 
                 if(response.hasNodes()){
-                    for(Node n : response.getAllNodes()){
-                        System.out.println(n);
+                    List<Node> nodes = response.getAllNodes();
+
+                    long now = System.currentTimeMillis();
+                    for(Node n : nodes){
+                        if(!n.hasSecureID() || n.hasQueried(now)){
+                            System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
+                            continue;
+                        }
+
+                        //System.out.println("PINGING "+n);
+
+                        PingRequest req = new PingRequest();
+                        req.setDestination(n.getAddress());
+                        try{
+                            getServer().send(new RequestEvent(req, n));
+                        }catch(IOException e){
+                            e.printStackTrace();
+                        }
                     }
                 }
 
@@ -214,7 +230,6 @@ public class Kademlia {
         //new JoinOperation(server, refresh, address).run();
     }
 
-    /*
     public void bind()throws SocketException {
         bind(0);
     }
@@ -235,9 +250,10 @@ public class Kademlia {
         }
         dht = new KDHT(server);
         dht.start();
-        *./
+        */
     }
 
+    /*
     public RefreshHandler getRefreshHandler(){
         return refresh;
     }

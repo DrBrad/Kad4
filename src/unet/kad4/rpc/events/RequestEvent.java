@@ -14,12 +14,10 @@ public class RequestEvent extends MessageEvent {
         super(message);
     }
 
-    /*
     public RequestEvent(MessageBase message, Node node){
         super(message);
         this.node = node;
     }
-    */
 
     public boolean hasResponseCallback(){
         return (callback != null);

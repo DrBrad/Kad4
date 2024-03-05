@@ -120,6 +120,12 @@ public class MRoutingTable extends RoutingTable {
         }
     }
 
+
+    @Override
+    public synchronized boolean hasQueried(Node node, long now){
+        return false;
+    }
+
     @Override
     public synchronized int getBucketUID(UID k){
         return uid.getDistance(k);//-1;
