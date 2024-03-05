@@ -74,7 +74,11 @@ public class Main {
             List<Node> test = new ArrayList<>();
             test.add(a);
 
+            b.markStale();
+            b.markStale();
+
             System.out.println(test.contains(b));
+            System.out.println(a.getStale());
 
             System.out.println("A = B "+a.equals(b));
 
