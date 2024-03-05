@@ -4,7 +4,9 @@ import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.utils.ByteWrapper;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class ResponseTracker {
 
@@ -46,12 +48,18 @@ public class ResponseTracker {
     public synchronized void removeStalled(){
         long now = System.currentTimeMillis();
 
+        List<ByteWrapper> stalled = new ArrayList<>();
+
         for(ByteWrapper tid : calls.keySet()){
-            RequestEvent event = calls.get(tid);
-            if(!event.isStalled(now)){
+            if(!calls.get(tid).isStalled(now)){
                 break;
             }
 
+            stalled.add(tid);
+        }
+
+        for(ByteWrapper tid : stalled){
+            RequestEvent event = calls.get(tid);
             calls.remove(tid);
             System.err.println("STALLED "+((event.hasNode()) ? event.getNode() : ""));
 

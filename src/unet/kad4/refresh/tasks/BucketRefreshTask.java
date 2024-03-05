@@ -113,7 +113,6 @@ public class BucketRefreshTask extends Task {
                             @Override
                             public void onStalled(StalledEvent event){
                                 n.markStale();
-                                System.err.println("Node stalled: "+n);
                             }
                         });
 
