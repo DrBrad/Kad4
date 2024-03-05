@@ -20,8 +20,10 @@ public class KEventListener {
         event.setResponse(response);
     }
 
-    @EventHandler(method = "ping", type = MessageType.RSP_MSG)
+    @EventHandler
     public void onResponse(ResponseEvent event){
+        if(event.hasNode()){
 
+        }
     }
 }

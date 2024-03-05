@@ -227,9 +227,10 @@ public class RPCServer {
                         }
 
                         ResponseEvent event = new ResponseEvent(m);
+                        event.received();
                         event.setNode(req.getNode());
                         event.setSentTime(req.getSentTime());
-                        event.received();
+                        event.setRequest(req.getMessage());
 
                         for(Method r : receivers.get(k)){
                             r.invoke(event);
