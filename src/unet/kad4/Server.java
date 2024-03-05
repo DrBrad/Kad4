@@ -255,6 +255,11 @@ public class Server {
                         }
                         */
 
+                        //PROBABLY JUST PREVENT THE CALLBACK...
+                        if(event.isPreventDefault()){
+                            return;
+                        }
+
                         if(req.hasResponseCallback()){
                             req.getResponseCallback().onResponse(event);
                         }

@@ -1,12 +1,17 @@
 package unet.kad4.example;
 
 import unet.kad4.Kademlia;
+import unet.kad4.messages.PingRequest;
 import unet.kad4.refresh.tasks.BucketRefreshTask;
 import unet.kad4.rpc.EventListener;
 import unet.kad4.rpc.KEventListener;
+import unet.kad4.rpc.events.RequestEvent;
+import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.EventHandler;
 import unet.kad4.rpc.events.inter.EventKey;
 import unet.kad4.rpc.events.inter.MessageEvent;
+import unet.kad4.rpc.events.inter.ResponseCallback;
+import unet.kad4.utils.Node;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -84,6 +89,21 @@ public class Main {
             while(true){
                 Thread.sleep(10000);
                 System.out.println("CONSENSUS: "+k.getRoutingTable().getDerivedUID()+"  "+k.getRoutingTable().getConsensusExternalAddress().getHostAddress()+"  "+ k.getRoutingTable().getAllNodes().size());
+
+                PingRequest test = new PingRequest();
+                Node n = k.getRoutingTable().getAllNodes().get(5);
+                test.setDestination(n.getAddress());
+
+                RequestEvent event = new RequestEvent(test, n);
+                event.setResponseCallback(new ResponseCallback(){
+                    @Override
+                    public void onResponse(ResponseEvent event){
+                        System.err.println("RECEIVED RESPONSE "+event.getNode());
+                    }
+                });
+
+                k.getServer().send(event);
+
             }
 
             //UID uid = k.getDHT().getUID();
