@@ -11,6 +11,7 @@ import unet.kad4.rpc.events.inter.EventKey;
 import unet.kad4.rpc.events.inter.MessageEvent;
 import unet.kad4.utils.ByteWrapper;
 import unet.kad4.utils.Node;
+import unet.kad4.utils.ReflectMethod;
 import unet.kad4.utils.net.AddressUtils;
 
 import java.io.IOException;
@@ -176,15 +177,13 @@ public class Server {
                             return;
                         }
 
-                        RequestEvent event = new RequestEvent(m, new Node(m.getUID(), m.getOrigin()));
+                        RequestEvent event = new RequestEvent(m);
                         event.received();
-                        event.setServer(this);
-                        event.setRoutingTable(kademlia.routingTable);
-                        kademlia.routingTable.insert(event.getNode());
+                        kademlia.routingTable.insert(new Node(m.getUID(), m.getOrigin()));
                         //event.setResponse(messages.get(new MessageKey(ben.getString(t.getRPCTypeName()), Type.RSP_MSG)).newInstance(ben.getBytes(TID_KEY)));
 
-                        for(Method r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
-                            r.invoke(event); //THROW ERROR - SEND ERROR MESSAGE
+                        for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
+                            r.getMethod().invoke(r.getInstance(), event); //THROW ERROR - SEND ERROR MESSAGE
                         }
 
                         if(event.isPreventDefault() || !event.hasResponse()){
@@ -218,28 +217,32 @@ public class Server {
                             return;
                         }
 
-                        if(req.hasNode() && !req.getNode().getUID().equals(m.getUID())){
-                            return;
-                        }
+                        //if(req.hasNode() && !req.getNode().getUID().equals(m.getUID())){
+                        //    return;
+                        //}
 
                         ResponseEvent event = new ResponseEvent(m);
                         event.received();
-
-                        event.setServer(this);
-                        event.setRoutingTable(kademlia.routingTable);
                         event.setSentTime(req.getSentTime());
                         event.setRequest(req.getMessage());
 
+                        /*
                         if(req.hasNode()){
                             event.setNode(req.getNode());
                         }else{
                             event.setNode(new Node(m.getUID(), m.getOrigin()));
                         }
+                        */
 
-                        System.out.println(k.getMethod()+"  "+k.getType());
+                        //System.out.println(k.getMethod()+"  "+k.getType());
 
-                        for(Method r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
-                            r.invoke(event);
+                        for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
+                            //System.out.println(r.getMethod().getName()+"  "+r.getMethod().getParameters()[0].getType().getSimpleName());
+                            r.getMethod().invoke(r.getInstance(), event);
+                        }
+
+                        if(req.hasResponseCallback()){
+                            req.getResponseCallback().onResponse(event);
                         }
 
                         //call.getMessageCallback().onResponse(m);
