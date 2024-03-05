@@ -221,8 +221,8 @@ public class RPCServer {
                         MessageBase m = messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
                         m.decode(ben);
 
-                        if(!req.getMessage().getDestination().equals(m.getOrigin()) ||
-                                !req.getMessage().getUID().equals(m.getUID())){
+                        //!req.getMessage().getUID().equals(m.getUID()) - THAT WOULDNT MATCH UP...
+                        if(!req.getMessage().getDestination().equals(m.getOrigin())){
                             return;
                         }
 

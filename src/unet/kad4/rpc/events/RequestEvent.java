@@ -1,8 +1,8 @@
 package unet.kad4.rpc.events;
 
 import unet.kad4.messages.inter.MessageBase;
-import unet.kad4.rpc.events.inter.Event;
 import unet.kad4.rpc.events.inter.MessageEvent;
+import unet.kad4.utils.Node;
 
 public class RequestEvent extends MessageEvent {
 
@@ -10,6 +10,11 @@ public class RequestEvent extends MessageEvent {
 
     public RequestEvent(MessageBase message){
         super(message);
+    }
+
+    public RequestEvent(MessageBase message, Node node){
+        super(message);
+        this.node = node;
     }
 
     public boolean hasResponse(){
