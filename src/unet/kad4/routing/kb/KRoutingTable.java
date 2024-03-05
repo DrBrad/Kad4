@@ -119,7 +119,11 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized void insert(Node n){
-        if(n.hasSecureID() && !uid.equals(n.getUID())){
+        if(secureOnly && !n.hasSecureID()){
+            return;
+        }
+
+        if(!uid.equals(n.getUID())){
             int id = getBucketUID(n.getUID());
             //boolean containsIP = getAllNodes().contains(n);
 

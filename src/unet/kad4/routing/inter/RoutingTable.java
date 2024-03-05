@@ -11,6 +11,7 @@ public abstract class RoutingTable {
 
     protected UID uid;
     protected List<RestartListener> listeners;
+    protected boolean secureOnly;
 
     public RoutingTable(){
         listeners = new ArrayList<>();
@@ -34,6 +35,14 @@ public abstract class RoutingTable {
 
     public boolean removeRestartListener(RestartListener listener){
         return listeners.remove(listener);
+    }
+
+    public boolean isSecureOnly(){
+        return secureOnly;
+    }
+
+    public void setSecureOnly(boolean secureOnly){
+        this.secureOnly = secureOnly;
     }
 
     /*
