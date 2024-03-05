@@ -5,6 +5,8 @@ import unet.kad4.messages.inter.*;
 import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
+import unet.kad4.rpc.events.inter.Event;
+import unet.kad4.rpc.events.inter.MessageEvent;
 import unet.kad4.utils.ByteWrapper;
 import unet.kad4.utils.net.AddressUtils;
 
@@ -173,9 +175,6 @@ public class RPCServer {
         MessageType t = MessageType.fromRPCTypeName(ben.getString(MessageType.TYPE_KEY));
 
         try{
-            //MessageKey k;
-            //Event event;
-
             switch(t){
                 case REQ_MSG: {
                         MessageKey k = new MessageKey(ben.getString(t.getRPCTypeName()), t);
@@ -207,14 +206,14 @@ public class RPCServer {
 
                 case RSP_MSG: {
                         byte[] tid = ben.getBytes(TID_KEY);
-                        RequestEvent rec = tracker.poll(new ByteWrapper(tid));
-                        if(rec == null){
+                        RequestEvent req = tracker.poll(new ByteWrapper(tid));
+                        if(req == null){
                             return;
                         }
 
                         //VERIFY ADDRESS AND PORT ARE ACCURATE...
 
-                        MessageKey k = new MessageKey(rec.getMessage().getMethod(), t);
+                        MessageKey k = new MessageKey(req.getMessage().getMethod(), t);
                         if(!messages.containsKey(k)){
                             return;
                         }
@@ -222,8 +221,14 @@ public class RPCServer {
                         MessageBase m = messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
                         m.decode(ben);
 
+                        if(!req.getMessage().getDestination().equals(m.getOrigin()) ||
+                                !req.getMessage().getUID().equals(m.getUID())){
+                            return;
+                        }
+
                         ResponseEvent event = new ResponseEvent(m);
-                        event.setSentTime(rec.getSentTime());
+                        event.setNode(req.getNode());
+                        event.setSentTime(req.getSentTime());
                         event.received();
 
                         for(Method r : receivers.get(k)){
@@ -240,7 +245,7 @@ public class RPCServer {
                     return;
             }
 
-        }catch(InvocationTargetException | InstantiationException | IllegalAccessException/* | MessageException*/ e){
+        }catch(InvocationTargetException | InstantiationException | IllegalAccessException | IOException/* | MessageException*/ e){
             e.printStackTrace();
         }
 
@@ -371,33 +376,44 @@ public class RPCServer {
         */
     }
 
-    public void send(MessageBase message){
+    public void send(MessageEvent event)throws IOException {
+        event.getMessage().setUID(routingTable.getDerivedUID());
+
+        if(event instanceof RequestEvent){
+            byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
+            event.getMessage().setTransactionID(tid);
+            tracker.add(new ByteWrapper(tid), (RequestEvent) event);
+        }
+
+        //try{
+            send(event.getMessage());
+            event.sent();
+        //}catch(IOException e){
+            //FAILED
+        //}
+            /*
+            switch(event.getMessage().getType()){
+                case REQ_MSG:
+                    byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
+                    event.getMessage().setTransactionID(tid);
+
+                    //RequestEvent event = new RequestEvent(message);
+                    event.sent();
+                    tracker.add(new ByteWrapper(tid), (RequestEvent) event);
+                    break;
+            }
+            */
+    }
+
+    private void send(MessageBase message)throws IOException {
         if(message.getDestination() == null){
             throw new IllegalArgumentException("Message destination set to null");
         }
 
-        try{
-            message.setUID(routingTable.getDerivedUID());
+        byte[] data = message.encode().encode();
+        DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestination());
 
-            switch(message.getType()){
-                case REQ_MSG:
-                    byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-                    message.setTransactionID(tid);
-
-                    RequestEvent event = new RequestEvent(message);
-                    event.sent();
-                    tracker.add(new ByteWrapper(tid), event);
-                    break;
-            }
-
-            byte[] data = message.encode().encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestination());
-
-            server.send(packet);
-
-        }catch(IOException e){
-            e.printStackTrace();
-        }
+        server.send(packet);
     }
 
     /*

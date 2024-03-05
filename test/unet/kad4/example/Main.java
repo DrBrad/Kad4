@@ -3,10 +3,13 @@ package unet.kad4.example;
 import unet.kad4.Kademlia;
 import unet.kad4.messages.FindNodeRequest;
 import unet.kad4.messages.PingRequest;
+import unet.kad4.utils.Node;
 import unet.kad4.utils.UID;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import static unet.kad4.rpc.RPCServer.TID_LENGTH;
 
@@ -64,6 +67,16 @@ public class Main {
 
 
             //System.out.println(r.getMethod()+"  "+r.getType());
+
+            Node a = new Node(new UID("992c105ffed716245654fd4c2c4d71e0f2df58cc"), InetAddress.getLocalHost(), 6881);
+            Node b = new Node(new UID("992c105ffed716245654fd4c2c4d71e0f2df58cc"), InetAddress.getLocalHost(), 6881);
+
+            List<Node> test = new ArrayList<>();
+            test.add(a);
+
+            System.out.println(test.contains(b));
+
+            System.out.println("A = B "+a.equals(b));
 
             Kademlia k = new Kademlia("Kademlia");
             k.registerEventListener(ReceiverListener.class);

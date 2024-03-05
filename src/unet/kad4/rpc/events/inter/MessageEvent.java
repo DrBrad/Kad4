@@ -1,12 +1,14 @@
 package unet.kad4.rpc.events.inter;
 
 import unet.kad4.messages.inter.MessageBase;
+import unet.kad4.utils.Node;
 
 import static unet.kad4.rpc.ResponseTracker.STALLED_TIME;
 
 public class MessageEvent extends Event {
 
     private MessageBase message;
+    private Node node;
     private long sentTime, receivedTime;
 
     public MessageEvent(MessageBase message){
@@ -15,6 +17,18 @@ public class MessageEvent extends Event {
 
     public MessageBase getMessage(){
         return message;
+    }
+
+    public boolean hasNode(){
+        return (node != null);
+    }
+
+    public void setNode(Node node){
+        this.node = node;
+    }
+
+    public Node getNode(){
+        return node;
     }
 
     public void setSentTime(long sentTime){
