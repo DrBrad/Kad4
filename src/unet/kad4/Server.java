@@ -180,6 +180,7 @@ public class Server {
 
                         Node node = new Node(m.getUID(), m.getOrigin());
                         kademlia.routingTable.insert(node);
+                        System.out.println("SEEN REQ "+node);
 
                         RequestEvent event = new RequestEvent(m);
                         event.received();

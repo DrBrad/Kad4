@@ -67,6 +67,7 @@ public class KEventListener extends EventListener {
     public void onFindNodeResponse(ResponseEvent event){
         //FindNodeResponse response = (FindNodeResponse) event.getMessage();
         //getRoutingTable().insert(event.getNode());
+        System.out.println("SEEN FN "+event.getNode());
 
 
         //FindNodeResponse response = (FindNodeResponse) event.getMessage();
