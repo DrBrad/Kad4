@@ -268,7 +268,7 @@ public class Server {
                     return;
             }
 
-        }catch(InvocationTargetException | InstantiationException | IllegalAccessException | IOException/* | MessageException*/ e){
+        }catch(IllegalArgumentException | InvocationTargetException | InstantiationException | IllegalAccessException | IOException/* | MessageException*/ e){
             e.printStackTrace();
         }
 
