@@ -113,7 +113,7 @@ public class Server {
                     */
 
                     //removeStalled();
-                    //tracker.removeStalled();
+                    tracker.removeStalled();
                 }
             }
         }).start();
@@ -409,12 +409,12 @@ public class Server {
         if(event instanceof RequestEvent){
             byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
             event.getMessage().setTransactionID(tid);
+            event.sent();
             tracker.add(new ByteWrapper(tid), (RequestEvent) event);
         }
 
         //try{
             send(event.getMessage());
-            event.sent();
         //}catch(IOException e){
             //FAILED
         //}
