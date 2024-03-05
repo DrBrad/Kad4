@@ -95,13 +95,6 @@ public class Main {
                 test.setDestination(n.getAddress());
 
                 RequestEvent event = new RequestEvent(test, n);
-                event.setResponseCallback(new ResponseCallback(){
-                    @Override
-                    public void onResponse(ResponseEvent event){
-                        System.err.println("RECEIVED RESPONSE "+event.getNode());
-                    }
-                });
-
                 k.getServer().send(event);
 
             }
