@@ -216,6 +216,10 @@ public class Server {
                         m.decode(ben);
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
+                        if(m.getPublic() != null){
+                            kademlia.getRoutingTable().updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                        }
+
                         //!req.getMessage().getUID().equals(m.getUID()) - THAT WOULDNT MATCH UP...
                         if(!req.getMessage().getDestination().equals(m.getOrigin())){
                             return;

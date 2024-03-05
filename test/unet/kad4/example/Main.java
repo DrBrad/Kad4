@@ -79,13 +79,12 @@ public class Main {
             //k.setDHT(KDHT.class);
             //k.bind(8080);
 
-            /*
-            k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
+            //k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
 
             while(true){
                 Thread.sleep(10000);
-                System.out.println("CONSENSUS: "+k.getUID()+"  "+k.getConsensusAddress().getHostAddress()+"  "+k.getRouterSize());
-            }*/
+                System.out.println("CONSENSUS: "+k.getRoutingTable().getDerivedUID()+"  "+k.getRoutingTable().getConsensusExternalAddress().getHostAddress()+"  "+ k.getRoutingTable().getAllNodes().size());
+            }
 
             //UID uid = k.getDHT().getUID();
             //System.out.println(uid);
