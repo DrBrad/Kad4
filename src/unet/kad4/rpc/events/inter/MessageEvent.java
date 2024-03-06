@@ -9,7 +9,7 @@ public class MessageEvent extends Event {
 
     protected MessageBase message;
     protected Node node;
-    protected long sentTime, receivedTime;
+    protected long receivedTime;
 
     public MessageEvent(MessageBase message){
         this.message = message;
@@ -31,6 +31,7 @@ public class MessageEvent extends Event {
         return node;
     }
 
+    /*
     public void setSentTime(long sentTime){
         this.sentTime = sentTime;
     }
@@ -38,6 +39,7 @@ public class MessageEvent extends Event {
     public long getSentTime(){
         return sentTime;
     }
+    */
 
     public void setReceivedTime(long receivedTime){
         this.receivedTime = receivedTime;
@@ -47,13 +49,16 @@ public class MessageEvent extends Event {
         return receivedTime;
     }
 
+    /*
     public boolean isStalled(long now){
         return (now-sentTime > STALLED_TIME);
     }
 
+    /*
     public void sent(){
         sentTime = System.currentTimeMillis();
     }
+    */
 
     public void received(){
         receivedTime = System.currentTimeMillis();

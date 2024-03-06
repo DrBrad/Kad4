@@ -4,11 +4,13 @@ import unet.kad4.Kademlia;
 import unet.kad4.libs.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.*;
 import unet.kad4.routing.inter.RoutingTable;
+import unet.kad4.rpc.Call;
 import unet.kad4.rpc.ResponseTracker;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.EventKey;
 import unet.kad4.rpc.events.inter.MessageEvent;
+import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.ByteWrapper;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.ReflectMethod;
@@ -174,7 +176,7 @@ public class Server {
                         m.decode(ben); //ERROR THROW - SEND ERROR MESSAGE
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
-                        if(!kademlia.eventListeners.containsKey(k)){
+                        if(!kademlia.requestMapping.containsKey(k)){
                             return;
                         }
 
@@ -187,7 +189,7 @@ public class Server {
                         event.setNode(node);
                         //event.setResponse(messages.get(new MessageKey(ben.getString(t.getRPCTypeName()), Type.RSP_MSG)).newInstance(ben.getBytes(TID_KEY)));
 
-                        for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
+                        for(ReflectMethod r : kademlia.requestMapping.get(m.getMethod()/*new EventKey(m.getMethod(), m.getType())*/)){
                             r.getMethod().invoke(r.getInstance(), event); //THROW ERROR - SEND ERROR MESSAGE
                         }
 
@@ -201,14 +203,14 @@ public class Server {
 
                 case RSP_MSG: {
                         byte[] tid = ben.getBytes(TID_KEY);
-                        RequestEvent req = tracker.poll(new ByteWrapper(tid));
-                        if(req == null){
+                        Call call = tracker.poll(new ByteWrapper(tid));
+                        if(call == null){
                             return;
                         }
 
                         //VERIFY ADDRESS AND PORT ARE ACCURATE...
 
-                        MessageKey k = new MessageKey(req.getMessage().getMethod(), t);
+                        MessageKey k = new MessageKey(call.getMessage().getMethod(), t);
                         if(!kademlia.messages.containsKey(k)){
                             return;
                         }
@@ -222,32 +224,34 @@ public class Server {
                         }
 
                         //!req.getMessage().getUID().equals(m.getUID()) - THAT WOULDNT MATCH UP...
-                        if(!req.getMessage().getDestination().equals(m.getOrigin())){
+                        if(!call.getMessage().getDestination().equals(m.getOrigin())){
                             return;
                         }
 
                         ResponseEvent event = new ResponseEvent(m);
                         event.received();
 
-                        if(req.hasNode()){
-                            if(!req.getNode().getUID().equals(m.getUID())){
+                        if(call.hasNode()){
+                            if(!call.getNode().getUID().equals(m.getUID())){
                                 return;
                             }
-                            event.setNode(req.getNode());
+                            event.setNode(call.getNode());
                         }else{
                             event.setNode(new Node(m.getUID(), m.getOrigin()));
                         }
 
-                        event.setNode(new Node(m.getUID(), m.getOrigin()));
-                        event.setSentTime(req.getSentTime());
-                        event.setRequest(req.getMessage());
+                        event.setSentTime(call.getSentTime());
+                        event.setRequest(call.getMessage());
 
+                        if(call.hasResponseCallback()){
+                            call.getResponseCallback().onResponse(event);
+                        }
                         //System.out.println(k.getMethod()+"  "+k.getType());
 
-                        for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
+                        //for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
                             //System.out.println(r.getMethod().getName()+"  "+r.getMethod().getParameters()[0].getType().getSimpleName());
-                            r.getMethod().invoke(r.getInstance(), event);
-                        }
+                        //    r.getMethod().invoke(r.getInstance(), event);
+                        //}
 
                         /*
                         if(kademlia.eventListeners.containsKey(new EventKey("*"))){
@@ -256,13 +260,10 @@ public class Server {
                         */
 
                         //PROBABLY JUST PREVENT THE CALLBACK...
-                        if(event.isPreventDefault()){
-                            return;
-                        }
+                        //if(event.isPreventDefault()){
+                        //    return;
+                        //}
 
-                        if(req.hasResponseCallback()){
-                            req.getResponseCallback().onResponse(event);
-                        }
 
                         //call.getMessageCallback().onResponse(m);
                     }
@@ -405,34 +406,7 @@ public class Server {
         */
     }
 
-    public void send(MessageEvent event)throws IOException {
-        if(event instanceof RequestEvent){
-            byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-            event.getMessage().setTransactionID(tid);
-            event.sent();
-            tracker.add(new ByteWrapper(tid), (RequestEvent) event);
-        }
-
-        //try{
-            send(event.getMessage());
-        //}catch(IOException e){
-            //FAILED
-        //}
-            /*
-            switch(event.getMessage().getType()){
-                case REQ_MSG:
-                    byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-                    event.getMessage().setTransactionID(tid);
-
-                    //RequestEvent event = new RequestEvent(message);
-                    event.sent();
-                    tracker.add(new ByteWrapper(tid), (RequestEvent) event);
-                    break;
-            }
-            */
-    }
-
-    private void send(MessageBase message)throws IOException {
+    public void send(MessageBase message)throws IOException {
         if(message.getDestination() == null){
             throw new IllegalArgumentException("Message destination set to null");
         }
@@ -441,6 +415,28 @@ public class Server {
 
         byte[] data = message.encode().encode();
         server.send(new DatagramPacket(data, 0, data.length, message.getDestination()));
+    }
+
+    public void send(MessageBase message, ResponseCallback callback)throws IOException {
+        if(message.getType() != MessageType.REQ_MSG){
+            send(message);
+        }
+
+        byte[] tid = generateTransactionID();
+        message.setTransactionID(tid);
+        tracker.add(new ByteWrapper(tid), new Call(message, callback));
+        send(message);
+    }
+
+    public void send(MessageBase message, Node node, ResponseCallback callback)throws IOException {
+        if(message.getType() != MessageType.REQ_MSG){
+            send(message);
+        }
+
+        byte[] tid = generateTransactionID();
+        message.setTransactionID(tid);
+        tracker.add(new ByteWrapper(tid), new Call(message, node, callback));
+        send(message);
     }
 
     //DONT INIT EVERY TIME...

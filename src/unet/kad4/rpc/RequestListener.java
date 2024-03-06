@@ -4,11 +4,15 @@ import unet.kad4.Kademlia;
 import unet.kad4.Server;
 import unet.kad4.routing.inter.RoutingTable;
 
-public class EventListener {
+public class RequestListener {
 
     private Kademlia kademlia;
 
-    public EventListener(Kademlia kademlia){
+    //public RequestListener(Kademlia kademlia){
+    //    this.kademlia = kademlia;
+    //}
+
+    private void setKademlia(Kademlia kademlia){
         this.kademlia = kademlia;
     }
 

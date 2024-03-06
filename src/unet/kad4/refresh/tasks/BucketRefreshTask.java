@@ -1,12 +1,11 @@
 package unet.kad4.refresh.tasks;
 
-import unet.kad4.Kademlia;
 import unet.kad4.messages.FindNodeRequest;
 import unet.kad4.messages.FindNodeResponse;
 import unet.kad4.messages.PingRequest;
 import unet.kad4.refresh.tasks.inter.Task;
 import unet.kad4.routing.kb.KBucket;
-import unet.kad4.rpc.events.RequestEvent;
+import unet.kad4.rpc.PingResponseListener;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.rpc.events.inter.ResponseCallback;
@@ -19,12 +18,9 @@ import java.util.List;
 
 public class BucketRefreshTask extends Task {
 
-    public BucketRefreshTask(Kademlia kademlia){
-        super(kademlia);
-    }
-
     @Override
     public void execute(){
+        PingResponseListener listener = new PingResponseListener(getRoutingTable());
         List<Node> queries = new ArrayList<>();
         System.out.println("EXECUTING BUCKET REFRESH");
 
@@ -33,17 +29,22 @@ public class BucketRefreshTask extends Task {
                 final UID k = getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
 
                 final List<Node> closest = getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
-                if(!closest.isEmpty()){
-                    for(Node n : closest){
-                        FindNodeRequest request = new FindNodeRequest();
-                        request.setDestination(n.getAddress());
-                        request.setTarget(k);
+                if(closest.isEmpty()){
+                    continue;
+                }
 
-                        RequestEvent event = new RequestEvent(request, n);
-                        event.setResponseCallback(new ResponseCallback(){
+                for(Node n : closest){
+                    FindNodeRequest request = new FindNodeRequest();
+                    request.setDestination(n.getAddress());
+                    request.setTarget(k);
+
+                    try{
+                        //RequestEvent event = new RequestEvent(request, n);
+                        getServer().send(request, n, new ResponseCallback(){
                             @Override
                             public void onResponse(ResponseEvent event){
                                 n.setSeen();
+                                System.out.println("SEEN FN "+n);
                                 //System.out.println(event.getMessage());
 
                                 FindNodeResponse response = (FindNodeResponse) event.getMessage();
@@ -71,30 +72,13 @@ public class BucketRefreshTask extends Task {
                                         PingRequest req = new PingRequest();
                                         req.setDestination(n.getAddress());
                                         try{
-                                            getServer().send(new RequestEvent(req, n));
+                                            getServer().send(req, n, listener);
                                         }catch(IOException e){
                                             e.printStackTrace();
                                         }
                                     }
                                 }
-
-                                /*
-                                FindNodeResponse response = (FindNodeResponse) event.getMessage();
-                                if(response.hasNodes()){
-                                    List<Node> nodes = ((FindNodeResponse) event.getMessage()).getAllNodes();
-                                    for(int i = nodes.size()-1; i > -1; i--){
-                                        if(queries.contains(nodes.get(i))){
-                                            nodes.remove(nodes.get(i));
-                                        }
-                                    }
-
-                                    queries.addAll(nodes);
-                                }
-                                */
-
-                                //SEND PINGS TO REMAINING NODES
                             }
-
 
                             @Override
                             public void onErrorResponse(ResponseEvent event){
@@ -102,25 +86,14 @@ public class BucketRefreshTask extends Task {
                                 //System.err.println("Node sent error message: "+event.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
                             }
 
-                            /*
-                            @Override
-                            public void onException(MessageException exception){
-                                n.setSeen();
-                                exception.printStackTrace();
-                            }
-                            */
-
                             @Override
                             public void onStalled(StalledEvent event){
                                 n.markStale();
                             }
                         });
 
-                        try{
-                            getServer().send(event);
-                        }catch(IOException e){
-                            e.printStackTrace();
-                        }
+                    }catch(IOException e){
+                        e.printStackTrace();
                     }
                 }
             }

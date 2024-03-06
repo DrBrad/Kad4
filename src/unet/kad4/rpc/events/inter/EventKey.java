@@ -1,10 +1,10 @@
 package unet.kad4.rpc.events.inter;
 
-import unet.kad4.messages.inter.MessageKey;
 import unet.kad4.messages.inter.MessageType;
 
 public class EventKey {
 
+    /*
     private String method;
     private MessageType type;
     private Priority priority = Priority.DEFAULT;
@@ -20,7 +20,7 @@ public class EventKey {
         this.priority = priority;
     }
 
-    public EventKey(EventHandler eventHandler){
+    public EventKey(RequestMapping eventHandler){
         method = eventHandler.method();
         type = eventHandler.type();
         priority = eventHandler.priority();
@@ -62,4 +62,5 @@ public class EventKey {
         }
         return false;
     }
+    */
 }

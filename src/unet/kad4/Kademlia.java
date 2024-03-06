@@ -11,14 +11,15 @@ import unet.kad4.refresh.tasks.BucketRefreshTask;
 import unet.kad4.refresh.tasks.StaleRefreshTask;
 import unet.kad4.routing.BucketTypes;
 import unet.kad4.routing.inter.RoutingTable;
-import unet.kad4.rpc.EventListener;
+import unet.kad4.rpc.PingResponseListener;
+import unet.kad4.rpc.RequestListener;
 import unet.kad4.rpc.KEventListener;
 import unet.kad4.refresh.RefreshHandler;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.EventKey;
 import unet.kad4.rpc.events.inter.MessageEvent;
-import unet.kad4.rpc.events.inter.EventHandler;
+import unet.kad4.rpc.events.inter.RequestMapping;
 import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.ReflectMethod;
@@ -44,7 +45,7 @@ public class Kademlia {
     //private DHT dht;
 
     //ALLOW DHT SPECIFICATION
-    protected Map<EventKey, List<ReflectMethod>> eventListeners;
+    protected Map<String, List<ReflectMethod>> requestMapping;
     protected Map<MessageKey, Constructor<?>> messages;
 
     public Kademlia(){
@@ -70,41 +71,41 @@ public class Kademlia {
         //refresh.addOperation(new StaleRefresh(server));
         //new RPCHandler()
         //dht = new KDHT(server);
+        BucketRefreshTask bucketRefreshTask = new BucketRefreshTask();
+
         routingTable.addRestartListener(new RoutingTable.RestartListener(){
             @Override
             public void onRestart(){
-                new BucketRefreshTask(Kademlia.this).execute();
+                bucketRefreshTask.execute();
             }
         });
 
-        eventListeners = new HashMap<>();
+        requestMapping = new HashMap<>();
         messages = new HashMap<>();
 
         try{
-            registerEventListener(KEventListener.class);
+            registerRequestListener(new KEventListener());
 
             registerMessage(PingRequest.class);
             registerMessage(PingResponse.class);
             registerMessage(FindNodeRequest.class);
             registerMessage(FindNodeResponse.class);
 
-            refresh.addOperation(BucketRefreshTask.class);
-            refresh.addOperation(StaleRefreshTask.class);
+            refresh.addOperation(bucketRefreshTask);
+            refresh.addOperation(new StaleRefreshTask());
 
-        }catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
+        }catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
         }
     }
 
-    public void registerEventListener(Class<?> c)throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        if(!c.getSuperclass().equals(EventListener.class)){
-            throw new IllegalArgumentException("Class '"+c.getSimpleName()+"' isn't a super of 'EventListener'");
-        }
+    public void registerRequestListener(RequestListener listener)throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method setKademlia = RequestListener.class.getDeclaredMethod("setKademlia", Kademlia.class);
+        setKademlia.setAccessible(true);
+        setKademlia.invoke(listener, this);
 
-        EventListener e = (EventListener) c.getDeclaredConstructor(Kademlia.class).newInstance(this);
-
-        for(Method method : c.getDeclaredMethods()){
-            if(method.isAnnotationPresent(EventHandler.class)){
+        for(Method method : listener.getClass().getDeclaredMethods()){
+            if(method.isAnnotationPresent(RequestMapping.class)){
                 Parameter[] parameters = method.getParameters();
 
                 if(parameters.length != 1){
@@ -114,25 +115,35 @@ public class Kademlia {
                 if(parameters[0].getType().getSuperclass().equals(MessageEvent.class)){
                     method.setAccessible(true);
 
-                    EventKey key = new EventKey(method.getAnnotation(EventHandler.class));
+                    //EventKey key = new EventKey(method.getAnnotation(RequestMapping.class));
+                    String key = method.getAnnotation(RequestMapping.class).value();
 
-                    System.out.println("Registered "+method.getName()+" event handler");
+                    System.out.println("Registered "+method.getName()+" request mapping");
 
-                    if(eventListeners.containsKey(key)){
-                        eventListeners.get(key).add(new ReflectMethod(e, method));
+                    if(requestMapping.containsKey(key)){
+                        requestMapping.get(key).add(new ReflectMethod(listener, method));
                         continue;
                     }
 
                     List<ReflectMethod> m = new ArrayList<>();
-                    m.add(new ReflectMethod(e, method));
-                    eventListeners.put(key, m);
+                    m.add(new ReflectMethod(listener, method));
+                    requestMapping.put(key, m);
                 }
             }
         }
+
+    }
+
+    public void registerRequestListener(Class<?> c)throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        if(!RequestListener.class.isAssignableFrom(c)){//.getSuperclass().equals(RequestListener.class)){
+            throw new IllegalArgumentException("Class '"+c.getSimpleName()+"' isn't a assignable from '"+RequestListener.class.getSimpleName()+"'");
+        }
+
+        registerRequestListener((RequestListener) c.getDeclaredConstructor().newInstance());
     }
 
     public void registerMessage(Class<?> c)throws NoSuchMethodException {
-        if(!c.getSuperclass().equals(MessageBase.class)){
+        if(!MessageBase.class.isAssignableFrom(c)){
             throw new IllegalArgumentException("Class doesn't extend 'MessageBase' class");
         }
 
@@ -162,27 +173,6 @@ public class Kademlia {
 
     public void join(int localPort, Node node)throws IOException {
         join(localPort, node.getAddress());
-        /*
-        if(!server.isRunning()){
-            server.start(localPort);
-        }
-
-        FindNodeRequest request = new FindNodeRequest();
-        request.setDestination(node.getAddress());
-        request.setTarget(routingTable.getDerivedUID());
-
-        RequestEvent event = new RequestEvent(request);
-        event.setResponseCallback(new ResponseCallback(){
-            @Override
-            public void onResponse(ResponseEvent event){
-                routingTable.insert(node);
-
-                System.out.println("INSERTED NODE");
-            }
-        });
-
-        server.send(event); //WHAT ABOUT REFRESH... WE NEED A CALLBACK...
-        */
     }
 
     public void join(int localPort, InetSocketAddress address)throws IOException {
@@ -194,17 +184,18 @@ public class Kademlia {
         FindNodeRequest request = new FindNodeRequest();
         request.setDestination(address);
         request.setTarget(routingTable.getDerivedUID());
-
-        RequestEvent event = new RequestEvent(request);
-        event.setResponseCallback(new ResponseCallback(){
+        server.send(request, new ResponseCallback(){
             @Override
             public void onResponse(ResponseEvent event){
                 routingTable.insert(event.getNode());
+                System.out.println("JOINED "+event.getNode());
 
                 FindNodeResponse response = (FindNodeResponse) event.getMessage();
 
                 if(response.hasNodes()){
                     List<Node> nodes = response.getAllNodes();
+
+                    PingResponseListener listener = new PingResponseListener(routingTable);
 
                     long now = System.currentTimeMillis();
                     for(Node n : nodes){
@@ -213,12 +204,10 @@ public class Kademlia {
                             continue;
                         }
 
-                        //System.out.println("PINGING "+n);
-
                         PingRequest req = new PingRequest();
                         req.setDestination(n.getAddress());
                         try{
-                            getServer().send(new RequestEvent(req, n));
+                            getServer().send(req, n, listener);
                         }catch(IOException e){
                             e.printStackTrace();
                         }
@@ -229,9 +218,7 @@ public class Kademlia {
                     refresh.start();
                 }
             }
-        });
-
-        server.send(event); //WHAT ABOUT REFRESH... WE NEED A CALLBACK...
+        }); //WHAT ABOUT REFRESH... WE NEED A CALLBACK...
         //dht.join(address);
 
         //new JoinOperation(server, refresh, address).run();

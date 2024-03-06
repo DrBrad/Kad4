@@ -2,8 +2,10 @@ package unet.kad4.refresh;
 
 import unet.kad4.Kademlia;
 import unet.kad4.refresh.tasks.inter.Task;
+import unet.kad4.rpc.RequestListener;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -116,12 +118,20 @@ public class RefreshHandler {
         refreshTime = time;
     }
 
+    public void addOperation(Task task)throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method setKademlia = Task.class.getDeclaredMethod("setKademlia", Kademlia.class);
+        setKademlia.setAccessible(true);
+        setKademlia.invoke(task, kademlia);
+
+        tasks.add(task);
+    }
+
     public void addOperation(Class<?> c)throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        if(!c.getSuperclass().equals(Task.class)){
+        if(!Task.class.isAssignableFrom(c)){
             throw new IllegalArgumentException("Class '"+c.getSimpleName()+"' isn't a super of 'Task'");
         }
 
-        tasks.add((Task) c.getDeclaredConstructor(Kademlia.class).newInstance(kademlia));
+        addOperation((Task) c.getDeclaredConstructor().newInstance());
     }
 
     public boolean removeOperation(Task task){

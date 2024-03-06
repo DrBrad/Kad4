@@ -9,7 +9,7 @@ public abstract class Task {
 
     private Kademlia kademlia;
 
-    public Task(Kademlia kademlia){
+    private void setKademlia(Kademlia kademlia){
         this.kademlia = kademlia;
     }
 

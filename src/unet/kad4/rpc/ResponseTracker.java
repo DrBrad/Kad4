@@ -13,7 +13,7 @@ public class ResponseTracker {
     public static final int MAX_ACTIVE_CALLS = 512;
 
     public static final long STALLED_TIME = 60000;
-    private final LinkedHashMap<ByteWrapper, RequestEvent> calls;
+    private final LinkedHashMap<ByteWrapper, Call> calls;
     //private final ConcurrentHashMap<ByteWrapper, RequestEvent> calls;
     //private final ConcurrentLinkedQueue<ByteWrapper> callsOrder;
 
@@ -23,11 +23,11 @@ public class ResponseTracker {
         //callsOrder = new ConcurrentLinkedQueue<>();
     }
 
-    public synchronized void add(ByteWrapper tid, RequestEvent event){
-        calls.put(tid, event);
+    public synchronized void add(ByteWrapper tid, Call call){
+        calls.put(tid, call);
     }
 
-    public synchronized RequestEvent get(ByteWrapper tid){
+    public synchronized Call get(ByteWrapper tid){
         return calls.get(tid);
     }
 
@@ -39,10 +39,10 @@ public class ResponseTracker {
         calls.remove(tid);
     }
 
-    public synchronized RequestEvent poll(ByteWrapper tid){
-        RequestEvent event = calls.get(tid);
+    public synchronized Call poll(ByteWrapper tid){
+        Call call = calls.get(tid);
         calls.remove(tid);
-        return event;
+        return call;
     }
 
     public synchronized void removeStalled(){
@@ -59,14 +59,14 @@ public class ResponseTracker {
         }
 
         for(ByteWrapper tid : stalled){
-            RequestEvent event = calls.get(tid);
+            Call call = calls.get(tid);
             calls.remove(tid);
-            System.err.println("STALLED "+((event.hasNode()) ? event.getNode() : ""));
+            System.err.println("STALLED "+((call.hasNode()) ? call.getNode() : ""));
 
-            if(event.hasResponseCallback()){
-                StalledEvent e = new StalledEvent(event.getMessage());
-                e.setSentTime(event.getSentTime());
-                event.getResponseCallback().onStalled(e);
+            if(call.hasResponseCallback()){
+                StalledEvent e = new StalledEvent(call.getMessage());
+                //e.setSentTime(call.getSentTime());
+                call.getResponseCallback().onStalled(e);
             }
         }
         /*

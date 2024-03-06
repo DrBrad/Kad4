@@ -8,6 +8,7 @@ import unet.kad4.utils.Node;
 public class ResponseEvent extends MessageEvent {
 
     private MessageBase request;
+    private long sentTime;
 
     public ResponseEvent(MessageBase message){
         super(message);
@@ -23,5 +24,13 @@ public class ResponseEvent extends MessageEvent {
 
     public MessageBase getRequest(){
         return request;
+    }
+
+    public void setSentTime(long sentTime){
+        this.sentTime = sentTime;
+    }
+
+    public long getSentTime(){
+        return sentTime;
     }
 }
