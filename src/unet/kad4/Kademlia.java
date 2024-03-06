@@ -13,12 +13,11 @@ import unet.kad4.routing.BucketTypes;
 import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.rpc.PingResponseListener;
 import unet.kad4.rpc.RequestListener;
-import unet.kad4.rpc.KEventListener;
+import unet.kad4.rpc.KRequestListener;
 import unet.kad4.refresh.RefreshHandler;
-import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
-import unet.kad4.rpc.events.inter.EventKey;
 import unet.kad4.rpc.events.inter.MessageEvent;
+import unet.kad4.rpc.events.inter.PriorityComparator;
 import unet.kad4.rpc.events.inter.RequestMapping;
 import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.Node;
@@ -32,10 +31,7 @@ import java.lang.reflect.Parameter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Kademlia {
 
@@ -84,7 +80,7 @@ public class Kademlia {
         messages = new HashMap<>();
 
         try{
-            registerRequestListener(new KEventListener());
+            registerRequestListener(new KRequestListener());
 
             registerMessage(PingRequest.class);
             registerMessage(PingResponse.class);
@@ -122,6 +118,7 @@ public class Kademlia {
 
                     if(requestMapping.containsKey(key)){
                         requestMapping.get(key).add(new ReflectMethod(listener, method));
+                        requestMapping.get(key).sort(new PriorityComparator());
                         continue;
                     }
 

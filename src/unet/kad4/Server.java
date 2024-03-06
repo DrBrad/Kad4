@@ -1,6 +1,5 @@
 package unet.kad4;
 
-import unet.kad4.Kademlia;
 import unet.kad4.libs.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.*;
 import unet.kad4.routing.inter.RoutingTable;
@@ -8,18 +7,14 @@ import unet.kad4.rpc.Call;
 import unet.kad4.rpc.ResponseTracker;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
-import unet.kad4.rpc.events.inter.EventKey;
-import unet.kad4.rpc.events.inter.MessageEvent;
 import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.ByteWrapper;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.ReflectMethod;
-import unet.kad4.utils.UID;
 import unet.kad4.utils.net.AddressUtils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;

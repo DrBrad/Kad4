@@ -2,7 +2,6 @@ package unet.kad4.routing.kb;
 
 import unet.kad4.libs.CRC32C;
 import unet.kad4.routing.inter.RoutingTable;
-import unet.kad4.utils.KComparator;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.UID;
 import unet.kad4.utils.net.AddressUtils;

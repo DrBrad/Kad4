@@ -1,4 +1,7 @@
-package unet.kad4.utils;
+package unet.kad4.routing.kb;
+
+import unet.kad4.utils.Node;
+import unet.kad4.utils.UID;
 
 import java.math.BigInteger;
 import java.util.Comparator;

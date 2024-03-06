@@ -1,6 +1,5 @@
 package unet.kad4.rpc;
 
-import unet.kad4.Kademlia;
 import unet.kad4.messages.FindNodeRequest;
 import unet.kad4.messages.FindNodeResponse;
 import unet.kad4.messages.PingResponse;
@@ -8,7 +7,7 @@ import unet.kad4.routing.kb.KBucket;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.inter.RequestMapping;
 
-public class KEventListener extends RequestListener {
+public class KRequestListener extends RequestListener {
 
     //private List<Node> queries;
 
