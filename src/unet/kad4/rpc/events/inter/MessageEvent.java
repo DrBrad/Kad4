@@ -15,6 +15,11 @@ public class MessageEvent extends Event {
         this.message = message;
     }
 
+    public MessageEvent(MessageBase message, Node node){
+        this(message);
+        this.node = node;
+    }
+
     public MessageBase getMessage(){
         return message;
     }

@@ -4,7 +4,7 @@ import unet.kad4.libs.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.*;
 
 @Message(method = "get_peers", type = MessageType.REQ_MSG)
-public class GetPeersRequest extends MessageBase {
+public class GetPeersRequest extends MethodMessageBase {
 
     public GetPeersRequest(byte[] tid){
         super(tid);

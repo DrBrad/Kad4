@@ -1,10 +1,12 @@
 package unet.kad4;
 
 import unet.kad4.libs.bencode.variables.BencodeObject;
+import unet.kad4.messages.ErrorResponse;
 import unet.kad4.messages.inter.*;
 import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.rpc.Call;
 import unet.kad4.rpc.ResponseTracker;
+import unet.kad4.rpc.events.ErrorResponseEvent;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.ResponseCallback;
@@ -26,7 +28,7 @@ import static unet.kad4.messages.inter.MessageBase.TID_KEY;
 
 public class Server {
 
-    public static final int MAX_ACTIVE_CALLS = 512, TID_LENGTH = 6;
+    public static final int TID_LENGTH = 6;
 
     private DatagramSocket server;
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
@@ -45,17 +47,6 @@ public class Server {
         }catch(NoSuchAlgorithmException e){
             e.printStackTrace();
         }
-
-        kademlia.routingTable.addRestartListener(new RoutingTable.RestartListener(){
-            @Override
-            public void onRestart(){
-                System.out.println("RESTART");
-                //new BucketRefresh(RPCServer.this).run();
-
-                //ONLY DO THIS IF WE ARE INCLUDING CACHE
-                //new StaleRefresh(RPCServer.this).run();
-            }
-        });
     }
 
     public void start(int port)throws SocketException {
@@ -114,16 +105,6 @@ public class Server {
         return (server != null) ? server.getLocalPort() : 0;
     }
 
-    /*
-    public void addRequestListener(RequestListener listener){
-        requestListeners.add(listener);
-    }
-
-    public void removeRequestListener(RequestListener listener){
-        requestListeners.remove(listener);
-    }
-    */
-
     private void onReceive(DatagramPacket packet){
         if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
@@ -150,7 +131,7 @@ public class Server {
                             return;
                         }
 
-                        MessageBase m = (MessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(ben.getBytes(TID_KEY));//.decode(ben);
+                        MethodMessageBase m = (MethodMessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(ben.getBytes(TID_KEY));//.decode(ben);
                         m.decode(ben); //ERROR THROW - SEND ERROR MESSAGE
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
@@ -162,9 +143,8 @@ public class Server {
                         kademlia.routingTable.insert(node);
                         System.out.println("SEEN REQ "+node);
 
-                        RequestEvent event = new RequestEvent(m);
+                        RequestEvent event = new RequestEvent(m, node);
                         event.received();
-                        event.setNode(node);
                         //event.setResponse(messages.get(new MessageKey(ben.getString(t.getRPCTypeName()), Type.RSP_MSG)).newInstance(ben.getBytes(TID_KEY)));
 
                         for(ReflectMethod r : kademlia.requestMapping.get(m.getMethod()/*new EventKey(m.getMethod(), m.getType())*/)){
@@ -186,14 +166,12 @@ public class Server {
                             return;
                         }
 
-                        //VERIFY ADDRESS AND PORT ARE ACCURATE...
-
-                        MessageKey k = new MessageKey(call.getMessage().getMethod(), t);
+                        MessageKey k = new MessageKey(((MethodMessageBase) call.getMessage()).getMethod(), t);
                         if(!kademlia.messages.containsKey(k)){
                             return;
                         }
 
-                        MessageBase m = (MessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
+                        MethodMessageBase m = (MethodMessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
                         m.decode(ben);
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
@@ -206,51 +184,70 @@ public class Server {
                             return;
                         }
 
-                        ResponseEvent event = new ResponseEvent(m);
-                        event.received();
+                        ResponseEvent event;
 
                         if(call.hasNode()){
                             if(!call.getNode().getUID().equals(m.getUID())){
                                 return;
                             }
-                            event.setNode(call.getNode());
+                            event = new ResponseEvent(m, call.getNode());
+
                         }else{
-                            event.setNode(new Node(m.getUID(), m.getOrigin()));
+                            event = new ResponseEvent(m, new Node(m.getUID(), m.getOrigin()));
                         }
 
+                        event.received();
                         event.setSentTime(call.getSentTime());
                         event.setRequest(call.getMessage());
 
                         if(call.hasResponseCallback()){
                             call.getResponseCallback().onResponse(event);
                         }
-                        //System.out.println(k.getMethod()+"  "+k.getType());
-
-                        //for(ReflectMethod r : kademlia.eventListeners.get(new EventKey(m.getMethod(), m.getType()))){
-                            //System.out.println(r.getMethod().getName()+"  "+r.getMethod().getParameters()[0].getType().getSimpleName());
-                        //    r.getMethod().invoke(r.getInstance(), event);
-                        //}
-
-                        /*
-                        if(kademlia.eventListeners.containsKey(new EventKey("*"))){
-
-                        }
-                        */
-
-                        //PROBABLY JUST PREVENT THE CALLBACK...
-                        //if(event.isPreventDefault()){
-                        //    return;
-                        //}
-
-
-                        //call.getMessageCallback().onResponse(m);
                     }
                     break;
 
-                case ERR_MSG:
+                case ERR_MSG: {
+                        byte[] tid = ben.getBytes(TID_KEY);
+                        Call call = tracker.poll(new ByteWrapper(tid));
+                        if(call == null){
+                            return;
+                        }
 
-                default:
-                    return;
+                        ErrorResponse m = new ErrorResponse(tid);
+                        m.decode(ben);
+                        m.setOrigin(packet.getAddress(), packet.getPort());
+
+                        if(m.getPublic() != null){
+                            kademlia.getRoutingTable().updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                        }
+
+                        //!req.getMessage().getUID().equals(m.getUID()) - THAT WOULDNT MATCH UP...
+                        if(!call.getMessage().getDestination().equals(m.getOrigin())){
+                            return;
+                        }
+
+                        ErrorResponseEvent event;// = new ErrorResponseEvent(m);
+                        //
+
+                        if(call.hasNode()){
+                            if(!call.getNode().getUID().equals(m.getUID())){
+                                return;
+                            }
+                            event = new ErrorResponseEvent(m, call.getNode());
+
+                        }else{
+                            event = new ErrorResponseEvent(m, new Node(m.getUID(), m.getOrigin()));
+                        }
+
+                        event.received();
+                        event.setSentTime(call.getSentTime());
+                        event.setRequest(call.getMessage());
+
+                        if(call.hasResponseCallback()){
+                            call.getResponseCallback().onErrorResponse(event);
+                        }
+                    }
+                    break;
             }
 
         }catch(IllegalArgumentException | InvocationTargetException | InstantiationException | IllegalAccessException | IOException/* | MessageException*/ e){

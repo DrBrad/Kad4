@@ -1,10 +1,10 @@
 package unet.kad4.messages.inter;
 
-import unet.kad4.messages.ErrorMessage;
+import unet.kad4.messages.ErrorResponse;
 
 public class MessageException extends Exception {
 
-    private ErrorMessage.ErrorType errorType;
+    //private ErrorResponse.ErrorType errorType;
 
     public MessageException(String message){
         super(message);
@@ -14,17 +14,19 @@ public class MessageException extends Exception {
         super(message,cause);
     }
 
-    public MessageException(String message, Throwable cause, ErrorMessage.ErrorType errorType){
+    /*
+    public MessageException(String message, Throwable cause, ErrorResponse.ErrorType errorType){
         super(message,cause);
         this.errorType = errorType;
     }
 
-    public MessageException(String message, ErrorMessage.ErrorType errorType){
+    public MessageException(String message, ErrorResponse.ErrorType errorType){
         super(message);
         this.errorType = errorType;
     }
 
-    public ErrorMessage.ErrorType getErrorType(){
+    public ErrorResponse.ErrorType getErrorType(){
         return errorType;
     }
+    */
 }

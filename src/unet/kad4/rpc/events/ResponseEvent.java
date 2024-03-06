@@ -14,6 +14,10 @@ public class ResponseEvent extends MessageEvent {
         super(message);
     }
 
+    public ResponseEvent(MessageBase message, Node node){
+        super(message, node);
+    }
+
     public boolean hasRequest(){
         return (request != null);
     }

@@ -1,6 +1,7 @@
 package unet.kad4.rpc;
 
 import unet.kad4.routing.inter.RoutingTable;
+import unet.kad4.rpc.events.ErrorResponseEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.rpc.events.inter.ResponseCallback;
@@ -20,7 +21,7 @@ public class PingResponseListener extends ResponseCallback {
     }
 
     @Override
-    public void onErrorResponse(ResponseEvent event){
+    public void onErrorResponse(ErrorResponseEvent event){
 
     }
 

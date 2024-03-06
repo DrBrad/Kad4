@@ -4,6 +4,7 @@ import unet.kad4.libs.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.Message;
 import unet.kad4.messages.inter.MessageBase;
 import unet.kad4.messages.inter.MessageType;
+import unet.kad4.messages.inter.MethodMessageBase;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.net.AddressType;
 
@@ -16,7 +17,7 @@ import static unet.kad4.utils.NodeUtils.packNodes;
 import static unet.kad4.utils.NodeUtils.unpackNodes;
 
 @Message(method = "find_node", type = MessageType.RSP_MSG)
-public class FindNodeResponse extends MessageBase {
+public class FindNodeResponse extends MethodMessageBase {
 
     /*
     * THIS CLASS COULD BE MADE MUCH BETTER BUT IT WORKS FOR NOW...
@@ -43,12 +44,12 @@ public class FindNodeResponse extends MessageBase {
 
         List<Node> nodes = getIPv4Nodes();
         if(!nodes.isEmpty()){
-            ben.getBencodeObject(message.type().innerKey()).put("nodes", packNodes(nodes, AddressType.IPv4));
+            ben.getBencodeObject(type.innerKey()).put("nodes", packNodes(nodes, AddressType.IPv4));
         }
 
         nodes = getIPv6Nodes();
         if(!nodes.isEmpty()){
-            ben.getBencodeObject(message.type().innerKey()).put("nodes6", packNodes(nodes, AddressType.IPv6));
+            ben.getBencodeObject(type.innerKey()).put("nodes6", packNodes(nodes, AddressType.IPv6));
         }
         return ben;
     }
@@ -57,17 +58,17 @@ public class FindNodeResponse extends MessageBase {
     public void decode(BencodeObject ben){
         super.decode(ben);
 
-        if(!ben.getBencodeObject(message.type().innerKey()).containsKey("nodes") &&
-                !ben.getBencodeObject(message.type().innerKey()).containsKey("nodes6")){
+        if(!ben.getBencodeObject(type.innerKey()).containsKey("nodes") &&
+                !ben.getBencodeObject(type.innerKey()).containsKey("nodes6")){
             //throw new MessageException("Response to "+FIND_NODE+" did not contain 'node' or 'node6'", ErrorMessage.ErrorType.PROTOCOL);
         }
 
-        if(ben.getBencodeObject(message.type().innerKey()).containsKey("nodes")){
-            nodes.addAll(unpackNodes(ben.getBencodeObject(message.type().innerKey()).getBytes("nodes"), AddressType.IPv4));
+        if(ben.getBencodeObject(type.innerKey()).containsKey("nodes")){
+            nodes.addAll(unpackNodes(ben.getBencodeObject(type.innerKey()).getBytes("nodes"), AddressType.IPv4));
         }
 
-        if(ben.getBencodeObject(message.type().innerKey()).containsKey("nodes6")){
-            nodes.addAll(unpackNodes(ben.getBencodeObject(message.type().innerKey()).getBytes("nodes6"), AddressType.IPv6));
+        if(ben.getBencodeObject(type.innerKey()).containsKey("nodes6")){
+            nodes.addAll(unpackNodes(ben.getBencodeObject(type.innerKey()).getBytes("nodes6"), AddressType.IPv6));
         }
     }
 

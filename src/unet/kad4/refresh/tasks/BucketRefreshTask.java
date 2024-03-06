@@ -6,6 +6,7 @@ import unet.kad4.messages.PingRequest;
 import unet.kad4.refresh.tasks.inter.Task;
 import unet.kad4.routing.kb.KBucket;
 import unet.kad4.rpc.PingResponseListener;
+import unet.kad4.rpc.events.ErrorResponseEvent;
 import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.rpc.events.inter.ResponseCallback;
@@ -150,7 +151,7 @@ public class BucketRefreshTask extends Task {
         }
 
         @Override
-        public void onErrorResponse(ResponseEvent event){
+        public void onErrorResponse(ErrorResponseEvent event){
             event.getNode().setSeen();
         }
 

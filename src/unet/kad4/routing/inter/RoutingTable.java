@@ -11,7 +11,7 @@ public abstract class RoutingTable {
 
     protected UID uid;
     protected List<RestartListener> listeners;
-    protected boolean secureOnly;
+    protected boolean secureOnly = true;
 
     public RoutingTable(){
         listeners = new ArrayList<>();

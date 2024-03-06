@@ -64,24 +64,10 @@ public class ResponseTracker {
             System.err.println("STALLED "+((call.hasNode()) ? call.getNode() : ""));
 
             if(call.hasResponseCallback()){
-                StalledEvent e = new StalledEvent(call.getMessage());
-                //e.setSentTime(call.getSentTime());
-                call.getResponseCallback().onStalled(e);
+                StalledEvent event = new StalledEvent(call.getMessage());
+                event.setSentTime(call.getSentTime());
+                call.getResponseCallback().onStalled(event);
             }
         }
-        /*
-        for(ByteWrapper tid : callsOrder){
-            RPCCall call = calls.get(tid);
-            if(!call.isStalled(now)){
-                break;
-            }
-
-            callsOrder.remove(tid);
-            calls.remove(tid);
-            call.getMessageCallback().onStalled();
-
-            //call.getMessageCallback().onResponse(call.getMessage());
-        }
-        */
     }
 }
