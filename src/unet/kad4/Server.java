@@ -34,21 +34,11 @@ public class Server {
     private SecureRandom random;
     protected final Kademlia kademlia;
     private ResponseTracker tracker;
-    //protected final RPCReceiver receiver;
-    //protected final Map<MessageKey, List<Method>> receivers;
-    //protected final Map<MessageKey, /*Class<MessageBase>*/Constructor<MessageBase>> messages;
-    //protected final Map<MessageKey, Class> encoders, decoders;
 
     public Server(Kademlia kademlia){
         this.kademlia = kademlia;
         tracker = new ResponseTracker();
-        //receiver = new RPCReceiver(this);
-        //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
-
-
-        //encoders = new HashMap<>();
-        //decoders = new HashMap<>();
 
         try{
             random = SecureRandom.getInstance("SHA1PRNG");
@@ -103,13 +93,6 @@ public class Server {
                         onReceive(receivePool.poll());
                     }
 
-                    /*
-                    if(!sendPool.isEmpty()){
-                        //server.send(sendPool.poll());
-                    }
-                    */
-
-                    //removeStalled();
                     tracker.removeStalled();
                 }
             }

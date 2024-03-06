@@ -115,6 +115,7 @@ public class BucketRefreshTask extends Task {
         @Override
         public void onResponse(ResponseEvent event){
             event.getNode().setSeen();
+            System.out.println("SEEN FN "+event.getNode());
             FindNodeResponse response = (FindNodeResponse) event.getMessage();
 
             if(response.hasNodes()){

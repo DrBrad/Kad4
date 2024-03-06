@@ -38,21 +38,12 @@ public class Kademlia {
     protected RoutingTable routingTable;
     private Server server;
     private RefreshHandler refresh;
-    //private DHT dht;
-
-    //ALLOW DHT SPECIFICATION
     protected Map<String, List<ReflectMethod>> requestMapping;
     protected Map<MessageKey, Constructor<?>> messages;
 
     public Kademlia(){
         this(BucketTypes.KADEMLIA.getRoutingTable());
     }
-
-    /*
-    public Kademlia(){
-        this(BucketTypes.KADEMLIA.getRoutingTable());
-    }
-    */
 
     public Kademlia(String bucketType){
         this(BucketTypes.fromString(bucketType).getRoutingTable());
@@ -63,10 +54,6 @@ public class Kademlia {
         System.out.println("Starting with bucket type: "+routingTable.getClass().getSimpleName());
         server = new Server(this);
         refresh = new RefreshHandler(this);
-        //refresh.addOperation(new BucketRefresh(server));
-        //refresh.addOperation(new StaleRefresh(server));
-        //new RPCHandler()
-        //dht = new KDHT(server);
         BucketRefreshTask bucketRefreshTask = new BucketRefreshTask();
 
         routingTable.addRestartListener(new RoutingTable.RestartListener(){
@@ -173,7 +160,6 @@ public class Kademlia {
     }
 
     public void join(int localPort, InetSocketAddress address)throws IOException {
-        //bind(localPort);
         if(!server.isRunning()){
             server.start(localPort);
         }
@@ -215,10 +201,7 @@ public class Kademlia {
                     refresh.start();
                 }
             }
-        }); //WHAT ABOUT REFRESH... WE NEED A CALLBACK...
-        //dht.join(address);
-
-        //new JoinOperation(server, refresh, address).run();
+        });
     }
 
     public void bind()throws SocketException {
@@ -233,65 +216,10 @@ public class Kademlia {
         if(!refresh.isRunning()){
             refresh.start();
         }
-
-        /*
-        if(dht != null){
-            dht.start();
-            return;
-        }
-        dht = new KDHT(server);
-        dht.start();
-        */
     }
-
-    /*
-    public RefreshHandler getRefreshHandler(){
-        return refresh;
-    }
-
-    public UID getUID(){
-        return server.getRoutingTable().getDerivedUID();
-    }
-
-    public InetAddress getConsensusAddress(){
-        return server.getRoutingTable().getConsensusExternalAddress();
-    }
-
-    public int getRouterSize(){
-        return server.getRoutingTable().getAllNodes().size();
-    }
-    */
-
-    /*
-    public void setDHT(Class<?> c){
-        if(DHT.class.isAssignableFrom(c)){
-            try{
-                Constructor<?> constructor = c.getConstructor(RPCServer.class);
-                DHT dht = (DHT) constructor.newInstance(server);
-
-                if(this.dht != null){
-                    this.dht.stop();
-                }
-                dht.start();
-
-            }catch(NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public DHT getDHT(){
-        return dht;
-    }
-    */
 
     public void stop(){
         server.stop();
         refresh.stop();
-        /*
-        if(dht != null){
-            dht.stop();
-        }
-        */
     }
 }
