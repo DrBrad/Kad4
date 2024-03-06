@@ -11,6 +11,7 @@ import unet.kad4.refresh.tasks.BucketRefreshTask;
 import unet.kad4.refresh.tasks.StaleRefreshTask;
 import unet.kad4.routing.BucketTypes;
 import unet.kad4.routing.inter.RoutingTable;
+import unet.kad4.rpc.JoinNodeListener;
 import unet.kad4.rpc.PingResponseListener;
 import unet.kad4.rpc.RequestListener;
 import unet.kad4.rpc.KRequestListener;
@@ -167,41 +168,7 @@ public class Kademlia {
         FindNodeRequest request = new FindNodeRequest();
         request.setDestination(address);
         request.setTarget(routingTable.getDerivedUID());
-        server.send(request, new ResponseCallback(){
-            @Override
-            public void onResponse(ResponseEvent event){
-                routingTable.insert(event.getNode());
-                System.out.println("JOINED "+event.getNode());
-
-                FindNodeResponse response = (FindNodeResponse) event.getMessage();
-
-                if(response.hasNodes()){
-                    List<Node> nodes = response.getAllNodes();
-
-                    PingResponseListener listener = new PingResponseListener(routingTable);
-
-                    long now = System.currentTimeMillis();
-                    for(Node n : nodes){
-                        if((getRoutingTable().isSecureOnly() && !n.hasSecureID()) || n.hasQueried(now)){
-                            System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
-                            continue;
-                        }
-
-                        PingRequest req = new PingRequest();
-                        req.setDestination(n.getAddress());
-                        try{
-                            getServer().send(req, n, listener);
-                        }catch(IOException e){
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                if(!refresh.isRunning()){
-                    refresh.start();
-                }
-            }
-        });
+        server.send(request, new JoinNodeListener(this));
     }
 
     public void bind()throws SocketException {
