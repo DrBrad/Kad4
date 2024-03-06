@@ -40,60 +40,6 @@ public class BucketRefreshTask extends Task {
 
                     try{
                         getServer().send(request, n, listener);
-                        //RequestEvent event = new RequestEvent(request, n);
-                        /*
-                        getServer().send(request, n, new ResponseCallback(){
-                            @Override
-                            public void onResponse(ResponseEvent event){
-                                n.setSeen();
-                                System.out.println("SEEN FN "+n);
-                                //System.out.println(event.getMessage());
-
-                                FindNodeResponse response = (FindNodeResponse) event.getMessage();
-
-                                if(response.hasNodes()){
-                                    List<Node> nodes = response.getAllNodes();
-
-                                    long now = System.currentTimeMillis();
-                                    for(int i = nodes.size()-1; i > -1; i--){
-                                        if(queries.contains(nodes.get(i)) || getRoutingTable().hasQueried(nodes.get(i), now)){
-                                            nodes.remove(nodes.get(i));
-                                        }
-                                    }
-
-                                    queries.addAll(nodes);
-
-                                    for(Node n : nodes){
-                                        if((getRoutingTable().isSecureOnly() && !n.hasSecureID()) || n.hasQueried(now)){
-                                            System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
-                                            continue;
-                                        }
-
-                                        //System.out.println("PINGING "+n);
-
-                                        PingRequest req = new PingRequest();
-                                        req.setDestination(n.getAddress());
-                                        try{
-                                            getServer().send(req, n, listener);
-                                        }catch(IOException e){
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onErrorResponse(ResponseEvent event){
-                                n.setSeen();
-                                //System.err.println("Node sent error message: "+event.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
-                            }
-
-                            @Override
-                            public void onStalled(StalledEvent event){
-                                n.markStale();
-                            }
-                        });
-                        */
 
                     }catch(IOException e){
                         e.printStackTrace();
@@ -136,8 +82,6 @@ public class BucketRefreshTask extends Task {
                         System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
                         continue;
                     }
-
-                    //System.out.println("PINGING "+n);
 
                     PingRequest req = new PingRequest();
                     req.setDestination(n.getAddress());

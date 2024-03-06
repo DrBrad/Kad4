@@ -65,6 +65,7 @@ public class Main {
             Kademlia k = new Kademlia("Kademlia");
             //k.registerEventListener(ReceiverListener.class);
             //k.registerMessage(GetPeersRequest.class);
+            //k.registerRequestListener(new ReceiverListener());
             k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
 
 
