@@ -12,23 +12,17 @@ import unet.kad4.refresh.tasks.StaleRefreshTask;
 import unet.kad4.routing.BucketTypes;
 import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.rpc.JoinNodeListener;
-import unet.kad4.rpc.PingResponseListener;
 import unet.kad4.rpc.RequestListener;
 import unet.kad4.rpc.KRequestListener;
 import unet.kad4.refresh.RefreshHandler;
-import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.inter.MessageEvent;
 import unet.kad4.rpc.events.inter.PriorityComparator;
 import unet.kad4.rpc.events.inter.RequestMapping;
-import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.ReflectMethod;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -78,15 +72,15 @@ public class Kademlia {
             refresh.addOperation(bucketRefreshTask);
             refresh.addOperation(new StaleRefreshTask());
 
-        }catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
+        }catch(NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
             e.printStackTrace();
         }
     }
 
-    public void registerRequestListener(RequestListener listener)throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method setKademlia = RequestListener.class.getDeclaredMethod("setKademlia", Kademlia.class);
-        setKademlia.setAccessible(true);
-        setKademlia.invoke(listener, this);
+    public void registerRequestListener(RequestListener listener)throws NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+        Field f = RequestListener.class.getDeclaredField("kademlia");
+        f.setAccessible(true);
+        f.set(listener, this);
 
         for(Method method : listener.getClass().getDeclaredMethods()){
             if(method.isAnnotationPresent(RequestMapping.class)){
@@ -119,7 +113,7 @@ public class Kademlia {
 
     }
 
-    public void registerRequestListener(Class<?> c)throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    public void registerRequestListener(Class<?> c)throws NoSuchFieldException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         if(!RequestListener.class.isAssignableFrom(c)){//.getSuperclass().equals(RequestListener.class)){
             throw new IllegalArgumentException("Class '"+c.getSimpleName()+"' isn't a assignable from '"+RequestListener.class.getSimpleName()+"'");
         }

@@ -8,18 +8,6 @@ public class RequestListener {
 
     private Kademlia kademlia;
 
-    //public RequestListener(Kademlia kademlia){
-    //    this.kademlia = kademlia;
-    //}
-
-    private void setKademlia(Kademlia kademlia){
-        this.kademlia = kademlia;
-    }
-
-    public Kademlia getKademlia(){
-        return kademlia;
-    }
-
     public Server getServer(){
         return kademlia.getServer();
     }

@@ -9,10 +9,6 @@ public abstract class Task {
 
     private Kademlia kademlia;
 
-    private void setKademlia(Kademlia kademlia){
-        this.kademlia = kademlia;
-    }
-
     public Server getServer(){
         return kademlia.getServer();
     }
