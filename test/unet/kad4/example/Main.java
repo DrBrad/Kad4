@@ -92,9 +92,6 @@ public class Main {
             //UID uid = k.getDHT().getUID();
             //System.out.println(uid);
 
-            //Node n = new Node(uid, Inet4Address.getLocalHost(), 8080);
-            //System.out.println("Has secure ID: "+n.hasSecureID());
-
             //k.stop();
 
         }catch(Exception e){
