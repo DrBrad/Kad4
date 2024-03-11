@@ -1,12 +1,12 @@
-package unet.kad4.libs;
+package unet.kad4.utils.hash;
 
 import java.util.zip.Checksum;
 
-public class CRC32C implements Checksum {
+public class CRC32c implements Checksum {
 
     private int crc;
 
-    public CRC32C(){
+    public CRC32c(){
         reset();
     }
 

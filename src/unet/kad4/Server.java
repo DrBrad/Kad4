@@ -1,9 +1,8 @@
 package unet.kad4;
 
-import unet.kad4.libs.bencode.variables.BencodeObject;
+import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.ErrorResponse;
 import unet.kad4.messages.inter.*;
-import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.rpc.Call;
 import unet.kad4.rpc.ResponseTracker;
 import unet.kad4.rpc.events.ErrorResponseEvent;

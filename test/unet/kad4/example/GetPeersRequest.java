@@ -1,6 +1,6 @@
 package unet.kad4.example;
 
-import unet.kad4.libs.bencode.variables.BencodeObject;
+import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.*;
 
 @Message(method = "get_peers", type = MessageType.REQ_MSG)

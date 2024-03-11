@@ -1,6 +1,6 @@
 package unet.kad4.routing.kb;
 
-import unet.kad4.libs.CRC32C;
+import unet.kad4.utils.hash.CRC32c;
 import unet.kad4.routing.inter.RoutingTable;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.UID;
@@ -98,7 +98,7 @@ public class KRoutingTable extends RoutingTable {
 
         ip[0] |= r << 5;
 
-        CRC32C c = new CRC32C();
+        CRC32c c = new CRC32c();
         c.update(ip, 0, ip.length);
         int crc = (int) c.getValue();
 

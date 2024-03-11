@@ -1,6 +1,6 @@
 package unet.kad4.utils;
 
-import unet.kad4.libs.CRC32C;
+import unet.kad4.utils.hash.CRC32c;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -99,7 +99,7 @@ public class Node {
 
         ip[0] |= r << 5;
 
-        CRC32C c = new CRC32C();
+        CRC32c c = new CRC32c();
         c.update(ip, 0, Math.min(ip.length, 8));
         int crc = (int) c.getValue();
 

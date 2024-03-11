@@ -1,15 +1,13 @@
 package unet.kad4.messages;
 
-import unet.kad4.libs.bencode.variables.BencodeObject;
+import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.Message;
-import unet.kad4.messages.inter.MessageBase;
 import unet.kad4.messages.inter.MessageType;
 import unet.kad4.messages.inter.MethodMessageBase;
 import unet.kad4.utils.Node;
 import unet.kad4.utils.net.AddressType;
 
 import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 

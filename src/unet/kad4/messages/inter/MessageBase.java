@@ -1,6 +1,6 @@
 package unet.kad4.messages.inter;
 
-import unet.kad4.libs.bencode.variables.BencodeObject;
+import unet.bencode.variables.BencodeObject;
 import unet.kad4.utils.UID;
 
 import java.net.InetAddress;

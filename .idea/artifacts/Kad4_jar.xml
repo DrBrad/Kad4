@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Kad4_jar</output-path>
     <root id="archive" name="Kad4.jar">
       <element id="module-output" name="Kad4" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/Bencode.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

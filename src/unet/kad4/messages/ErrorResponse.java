@@ -1,7 +1,7 @@
 package unet.kad4.messages;
 
-import unet.kad4.libs.bencode.variables.BencodeArray;
-import unet.kad4.libs.bencode.variables.BencodeObject;
+import unet.bencode.variables.BencodeArray;
+import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.MessageBase;
 import unet.kad4.messages.inter.MessageType;
 import unet.kad4.utils.net.AddressUtils;
