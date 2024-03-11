@@ -27,6 +27,8 @@ public class PingResponseListener extends ResponseCallback {
 
     @Override
     public void onStalled(StalledEvent event){
-
+        if(event.hasNode()){
+            event.getNode().markStale();
+        }
     }
 }
