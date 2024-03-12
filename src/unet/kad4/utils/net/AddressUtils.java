@@ -75,8 +75,8 @@ public class AddressUtils {
                     buf[2],
                     buf[3],
 
-                    (byte) ((address.getPort() & 0xFF00) >> 8),
-                    (byte) (address.getPort() & 0xFF)
+                    (byte) ((address.getPort() & 0xff00) >> 8),
+                    (byte) (address.getPort() & 0xff)
             };
 
         }else if(address.getAddress() instanceof Inet6Address){
@@ -101,8 +101,8 @@ public class AddressUtils {
                     buf[14],
                     buf[15],
 
-                    (byte) ((address.getPort() & 0xFF00) >> 8),
-                    (byte) (address.getPort() & 0xFF)
+                    (byte) ((address.getPort() & 0xff00) >> 8),
+                    (byte) (address.getPort() & 0xff)
             };
         }
 
@@ -119,7 +119,7 @@ public class AddressUtils {
                         buf[3]
                 });
 
-                return new InetSocketAddress(address, ((buf[4] << 8) | buf[5] & 0xFF));
+                return new InetSocketAddress(address, ((buf[4] << 8) | buf[5] & 0xff));
 
             }else if(buf.length == 18){
                 InetAddress address = InetAddress.getByAddress(new byte[]{
@@ -144,7 +144,7 @@ public class AddressUtils {
                         buf[15]
                 });
 
-                return new InetSocketAddress(address, ((buf[16] << 8) | buf[17] & 0xFF));
+                return new InetSocketAddress(address, ((buf[16] << 8) | buf[17] & 0xff));
             }
         }catch(UnknownHostException e){
             e.printStackTrace();
