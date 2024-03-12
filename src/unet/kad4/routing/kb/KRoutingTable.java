@@ -58,7 +58,7 @@ public class KRoutingTable extends RoutingTable {
                 short res = 0, count = 1;
 
                 for(short i = 1; i < k.size(); i++){
-                    count += (k.get(i) == k.get(res)) ? 1 : -1;
+                    count += (k.get(i).equals(k.get(res))) ? 1 : -1;
 
                     if(count == 0){
                         res = i;
@@ -67,7 +67,7 @@ public class KRoutingTable extends RoutingTable {
                 }
 
                 //CHANGE - TO AUTO UPDATE UID BASED OFF OF IP CONSENSUS CHANGES
-                if(consensusExternalAddress != k.get(res)){
+                if(!consensusExternalAddress.equals(k.get(res))){
                     consensusExternalAddress = k.get(res);
                     deriveUID();
                     restart();
