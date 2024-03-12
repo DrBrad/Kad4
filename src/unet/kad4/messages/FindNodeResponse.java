@@ -8,6 +8,7 @@ import unet.kad4.utils.Node;
 import unet.kad4.utils.net.AddressType;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,7 +118,7 @@ public class FindNodeResponse extends MethodMessageBase {
         List<Node> r = new ArrayList<>();
 
         for(Node node : nodes){
-            if(node.getHostAddress() instanceof Inet4Address){
+            if(node.getHostAddress() instanceof Inet6Address){
                 r.add(node);
             }
         }
