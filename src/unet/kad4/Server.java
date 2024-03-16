@@ -385,6 +385,10 @@ public class Server {
             throw new IllegalArgumentException("Message destination set to null");
         }
 
+        if(AddressUtils.isBogon(message.getDestination())){
+            throw new IllegalArgumentException("Message destination set to bogon");
+        }
+
         message.setUID(kademlia.routingTable.getDerivedUID());
 
         byte[] data = message.encode().encode();

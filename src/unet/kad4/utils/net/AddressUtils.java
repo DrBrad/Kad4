@@ -34,6 +34,10 @@ public class AddressUtils {
         }
     }
 
+    public static boolean isBogon(InetSocketAddress address){
+        return !(address.getPort() > 0 && address.getPort() <= 0xffff && isGlobalUnicast(address.getAddress()));
+    }
+
     public static boolean isBogon(InetAddress address, int port){
         return !(port > 0 && port <= 0xffff && isGlobalUnicast(address));
     }
