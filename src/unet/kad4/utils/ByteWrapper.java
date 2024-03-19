@@ -4,12 +4,16 @@ import java.util.Arrays;
 
 public class ByteWrapper {
 
-    public final byte[] b;
+    private final byte[] b;
     private final int h;
 
     public ByteWrapper(byte[] b){
         this.b = b;
         h = Arrays.hashCode(b);
+    }
+
+    public byte[] getBytes(){
+        return b;
     }
 
     @Override
