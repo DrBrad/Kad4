@@ -21,7 +21,6 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static unet.kad4.messages.inter.MessageBase.TID_KEY;
 
@@ -30,7 +29,6 @@ public class Server {
     public static final int TID_LENGTH = 6;
 
     private DatagramSocket server;
-    private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
 
     private SecureRandom random;
     protected final Kademlia kademlia;
@@ -39,7 +37,6 @@ public class Server {
     public Server(Kademlia kademlia){
         this.kademlia = kademlia;
         tracker = new ResponseTracker();
-        receivePool = new ConcurrentLinkedQueue<>();
 
         try{
             random = SecureRandom.getInstance("SHA1PRNG");
@@ -66,24 +63,17 @@ public class Server {
                         server.receive(packet);
 
                         if(packet != null){
-                            receivePool.offer(packet);
+                            new Thread(new Runnable(){
+                                @Override
+                                public void run(){
+                                    onReceive(packet);
+                                    tracker.removeStalled();
+                                }
+                            }).start();
                         }
                     }catch(IOException e){
                         e.printStackTrace();
                     }
-                }
-            }
-        }).start();
-
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                while(!server.isClosed()){
-                    if(!receivePool.isEmpty()){
-                        onReceive(receivePool.poll());
-                    }
-
-                    tracker.removeStalled();
                 }
             }
         }).start();
