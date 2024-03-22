@@ -124,7 +124,10 @@ public class Server {
                         m.decode(ben); //ERROR THROW - SEND ERROR MESSAGE
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
-                        if(!kademlia.requestMapping.containsKey(k)){
+
+                    System.err.println("RECEIVED MESSAGE  "+k.getMethod()+"  "+k.getType());
+
+                        if(!kademlia.requestMapping.containsKey(m.getMethod())){
                             return;
                         }
 
