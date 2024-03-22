@@ -145,6 +145,10 @@ public class Server {
                         }
 
                         send(event.getResponse());
+
+                        if(!kademlia.getRefreshHandler().isRunning()){
+                            kademlia.getRefreshHandler().start();
+                        }
                     }
                     break;
 

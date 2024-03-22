@@ -173,10 +173,6 @@ public class Kademlia {
         if(!server.isRunning()){
             server.start(port);
         }
-
-        if(!refresh.isRunning()){
-            refresh.start();
-        }
     }
 
     public void stop(){
