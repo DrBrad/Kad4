@@ -56,6 +56,7 @@ public class Kademlia extends KademliaBase {
 
     public void join(int localPort, InetSocketAddress address)throws IOException {
         super.join(localPort, address);
+
         FindNodeRequest request = new FindNodeRequest();
         request.setDestination(address);
         request.setTarget(routingTable.getDerivedUID());
