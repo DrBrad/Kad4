@@ -78,7 +78,7 @@ public class BucketRefreshTask extends Task {
                 queries.addAll(nodes);
 
                 for(Node n : nodes){
-                    if((getRoutingTable().isSecureOnly() && !n.hasSecureID()) || n.hasQueried(now)){
+                    if(getRoutingTable().isSecureOnly() && !n.hasSecureID()){
                         System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
                         continue;
                     }
