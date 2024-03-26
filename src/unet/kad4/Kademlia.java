@@ -54,6 +54,7 @@ public class Kademlia extends KademliaBase {
         }
     }
 
+    @Override
     public void join(int localPort, InetSocketAddress address)throws IOException {
         super.join(localPort, address);
 
