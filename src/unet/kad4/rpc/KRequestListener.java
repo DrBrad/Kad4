@@ -23,6 +23,10 @@ public class KRequestListener extends RequestListener {
 
     @RequestMapping("find_node")
     public void onFindNodeRequest(RequestEvent event){
+        if(event.isPreventDefault()){
+            return;
+        }
+
         FindNodeRequest request = (FindNodeRequest) event.getMessage();
 
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
