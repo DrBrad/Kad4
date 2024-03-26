@@ -1,6 +1,7 @@
-package unet.kad4;
+package unet.kad4.kad;
 
 import unet.bencode.variables.BencodeObject;
+import unet.kad4.Kademlia;
 import unet.kad4.messages.ErrorResponse;
 import unet.kad4.messages.inter.*;
 import unet.kad4.rpc.Call;
@@ -31,10 +32,10 @@ public class Server {
     private DatagramSocket server;
 
     private SecureRandom random;
-    protected final Kademlia kademlia;
+    protected final KademliaBase kademlia;
     private ResponseTracker tracker;
 
-    public Server(Kademlia kademlia){
+    public Server(KademliaBase kademlia){
         this.kademlia = kademlia;
         tracker = new ResponseTracker();
 

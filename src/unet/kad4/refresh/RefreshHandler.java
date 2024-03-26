@@ -1,6 +1,7 @@
 package unet.kad4.refresh;
 
 import unet.kad4.Kademlia;
+import unet.kad4.kad.KademliaBase;
 import unet.kad4.refresh.tasks.inter.Task;
 
 import java.lang.reflect.Field;
@@ -12,14 +13,14 @@ import java.util.TimerTask;
 
 public class RefreshHandler {
 
-    private Kademlia kademlia;
+    private KademliaBase kademlia;
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
     private List<Task> tasks;
     //private long refreshTime = 30000;
     private long refreshTime = 3600000;
 
-    public RefreshHandler(Kademlia kademlia){
+    public RefreshHandler(KademliaBase kademlia){
         this.kademlia = kademlia;
         tasks = new ArrayList<>();
     }
