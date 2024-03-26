@@ -1,6 +1,7 @@
 package unet.kad4.rpc;
 
 import unet.kad4.Kademlia;
+import unet.kad4.kad.KademliaBase;
 import unet.kad4.messages.FindNodeResponse;
 import unet.kad4.messages.PingRequest;
 import unet.kad4.rpc.events.ErrorResponseEvent;
@@ -14,9 +15,9 @@ import java.util.List;
 
 public class JoinNodeListener extends ResponseCallback {
 
-    private Kademlia kademlia;
+    private KademliaBase kademlia;
 
-    public JoinNodeListener(Kademlia kademlia){
+    public JoinNodeListener(KademliaBase kademlia){
         this.kademlia = kademlia;
     }
 
