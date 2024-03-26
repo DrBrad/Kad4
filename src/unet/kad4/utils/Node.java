@@ -11,8 +11,8 @@ public class Node {
     public static final byte[] V6_MASK = { 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, (byte) 0xff };
     public static long QUERY_TIME = 3600000;
 
-    protected UID uid;
-    protected InetSocketAddress address;
+    private UID uid;
+    private InetSocketAddress address;
     //protected InetAddress address;
     //protected int port;
 
