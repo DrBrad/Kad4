@@ -1,7 +1,6 @@
 package unet.kad4.kad;
 
 import unet.bencode.variables.BencodeObject;
-import unet.kad4.Kademlia;
 import unet.kad4.messages.ErrorResponse;
 import unet.kad4.messages.inter.*;
 import unet.kad4.rpc.Call;

@@ -1,6 +1,5 @@
 package unet.kad4.rpc;
 
-import unet.kad4.Kademlia;
 import unet.kad4.kad.KademliaBase;
 import unet.kad4.messages.FindNodeResponse;
 import unet.kad4.messages.PingRequest;
