@@ -25,7 +25,6 @@ import java.util.Map;
 
 public class KademliaBase {
 
-
     protected RoutingTable routingTable;
     protected Server server;
     protected RefreshHandler refresh;
