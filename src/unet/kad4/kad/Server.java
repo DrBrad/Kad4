@@ -4,10 +4,14 @@ import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.ErrorResponse;
 import unet.kad4.messages.inter.*;
 import unet.kad4.rpc.Call;
+import unet.kad4.rpc.RequestListener;
 import unet.kad4.rpc.ResponseTracker;
 import unet.kad4.rpc.events.ErrorResponseEvent;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.ResponseEvent;
+import unet.kad4.rpc.events.inter.MessageEvent;
+import unet.kad4.rpc.events.inter.PriorityComparator;
+import unet.kad4.rpc.events.inter.RequestMapping;
 import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.ByteWrapper;
 import unet.kad4.utils.Node;
@@ -15,12 +19,16 @@ import unet.kad4.utils.ReflectMethod;
 import unet.kad4.utils.net.AddressUtils;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static unet.kad4.messages.inter.MessageBase.TID_KEY;
 
@@ -28,15 +36,20 @@ public class Server {
 
     public static final int TID_LENGTH = 6;
 
-    private DatagramSocket server;
+    protected final KademliaBase kademlia;
+    protected DatagramSocket server;
 
     private SecureRandom random;
-    protected final KademliaBase kademlia;
-    private ResponseTracker tracker;
+    protected ResponseTracker tracker;
+    protected Map<String, List<ReflectMethod>> requestMapping;
+    protected Map<MessageKey, Constructor<?>> messages;
 
     public Server(KademliaBase kademlia){
         this.kademlia = kademlia;
         tracker = new ResponseTracker();
+
+        requestMapping = new HashMap<>();
+        messages = new HashMap<>();
 
         try{
             random = SecureRandom.getInstance("SHA1PRNG");
@@ -86,6 +99,64 @@ public class Server {
         server.close();
     }
 
+    public void registerRequestListener(RequestListener listener)throws NoSuchFieldException, IllegalAccessException,
+            InvocationTargetException {
+        Field f = RequestListener.class.getDeclaredField("kademlia");
+        f.setAccessible(true);
+        f.set(listener, kademlia);
+
+        for(Method method : listener.getClass().getDeclaredMethods()){
+            if(method.isAnnotationPresent(RequestMapping.class)){
+                Parameter[] parameters = method.getParameters();
+
+                if(parameters.length != 1){
+                    continue;
+                }
+
+                if(parameters[0].getType().getSuperclass().equals(MessageEvent.class)){
+                    method.setAccessible(true);
+
+                    //EventKey key = new EventKey(method.getAnnotation(RequestMapping.class));
+                    String key = method.getAnnotation(RequestMapping.class).value();
+
+                    System.out.println("Registered "+method.getName()+" request mapping");
+
+                    if(requestMapping.containsKey(key)){
+                        requestMapping.get(key).add(new ReflectMethod(listener, method));
+                        requestMapping.get(key).sort(new PriorityComparator());
+                        continue;
+                    }
+
+                    List<ReflectMethod> m = new ArrayList<>();
+                    m.add(new ReflectMethod(listener, method));
+                    requestMapping.put(key, m);
+                }
+            }
+        }
+    }
+
+    public void registerRequestListener(Class<?> c)throws NoSuchFieldException, NoSuchMethodException,
+            InstantiationException, IllegalAccessException, InvocationTargetException {
+        if(!RequestListener.class.isAssignableFrom(c)){//.getSuperclass().equals(RequestListener.class)){
+            throw new IllegalArgumentException("Class '"+c.getSimpleName()+"' isn't a assignable from '"+RequestListener.class.getSimpleName()+"'");
+        }
+
+        registerRequestListener((RequestListener) c.getDeclaredConstructor().newInstance());
+    }
+
+    public void registerMessage(Class<?> c)throws NoSuchMethodException {
+        if(!MessageBase.class.isAssignableFrom(c)){
+            throw new IllegalArgumentException("Class doesn't extend 'MessageBase' class");
+        }
+
+        if(!c.isAnnotationPresent(Message.class)){
+            throw new IllegalArgumentException("Class is missing '@Message' annotation");
+        }
+
+        messages.put(new MessageKey(c.getAnnotation(Message.class)), c.getDeclaredConstructor(byte[].class));
+        System.out.println("Registered "+c.getSimpleName()+" message");
+    }
+
     public boolean isRunning(){
         return (server != null && !server.isClosed());
     }
@@ -94,7 +165,7 @@ public class Server {
         return (server != null) ? server.getLocalPort() : 0;
     }
 
-    private void onReceive(DatagramPacket packet){
+    protected void onReceive(DatagramPacket packet){
         if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
         }
@@ -116,18 +187,18 @@ public class Server {
             switch(t){
                 case REQ_MSG: {
                         MessageKey k = new MessageKey(ben.getString(t.getRPCTypeName()), t);
-                        if(!kademlia.messages.containsKey(k)){
+                        if(!messages.containsKey(k)){
                             return;
                         }
 
-                        MethodMessageBase m = (MethodMessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(ben.getBytes(TID_KEY));//.decode(ben);
+                        MethodMessageBase m = (MethodMessageBase) messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(ben.getBytes(TID_KEY));//.decode(ben);
                         m.decode(ben); //ERROR THROW - SEND ERROR MESSAGE
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
 
                     System.err.println("RECEIVED MESSAGE  "+k.getMethod()+"  "+k.getType());
 
-                        if(!kademlia.requestMapping.containsKey(m.getMethod())){
+                        if(!requestMapping.containsKey(m.getMethod())){
                             return;
                         }
 
@@ -139,7 +210,7 @@ public class Server {
                         event.received();
                         //event.setResponse(messages.get(new MessageKey(ben.getString(t.getRPCTypeName()), Type.RSP_MSG)).newInstance(ben.getBytes(TID_KEY)));
 
-                        for(ReflectMethod r : kademlia.requestMapping.get(m.getMethod()/*new EventKey(m.getMethod(), m.getType())*/)){
+                        for(ReflectMethod r : requestMapping.get(m.getMethod()/*new EventKey(m.getMethod(), m.getType())*/)){
                             r.getMethod().invoke(r.getInstance(), event); //THROW ERROR - SEND ERROR MESSAGE
                         }
 
@@ -163,11 +234,11 @@ public class Server {
                         }
 
                         MessageKey k = new MessageKey(((MethodMessageBase) call.getMessage()).getMethod(), t);
-                        if(!kademlia.messages.containsKey(k)){
+                        if(!messages.containsKey(k)){
                             return;
                         }
 
-                        MethodMessageBase m = (MethodMessageBase) kademlia.messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
+                        MethodMessageBase m = (MethodMessageBase) messages.get(k)/*.getDeclaredConstructor(byte[].class)*/.newInstance(tid);//.decode(ben);
                         m.decode(ben);
                         m.setOrigin(packet.getAddress(), packet.getPort());
 

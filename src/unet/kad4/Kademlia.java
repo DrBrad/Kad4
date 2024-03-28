@@ -39,12 +39,12 @@ public class Kademlia extends KademliaBase {
         });
 
         try{
-            registerRequestListener(new KRequestListener());
+            server.registerRequestListener(new KRequestListener());
 
-            registerMessage(PingRequest.class);
-            registerMessage(PingResponse.class);
-            registerMessage(FindNodeRequest.class);
-            registerMessage(FindNodeResponse.class);
+            server.registerMessage(PingRequest.class);
+            server.registerMessage(PingResponse.class);
+            server.registerMessage(FindNodeRequest.class);
+            server.registerMessage(FindNodeResponse.class);
 
             refresh.addOperation(bucketRefreshTask);
             refresh.addOperation(new StaleRefreshTask());
