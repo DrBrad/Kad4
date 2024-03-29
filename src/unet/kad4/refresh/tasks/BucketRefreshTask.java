@@ -26,9 +26,9 @@ public class BucketRefreshTask extends Task {
 
         for(int i = 1; i < UID.ID_LENGTH; i++){
             if(getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
-                final UID k = getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
+                UID k = getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
 
-                final List<Node> closest = getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
+                List<Node> closest = getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
                 if(closest.isEmpty()){
                     continue;
                 }
