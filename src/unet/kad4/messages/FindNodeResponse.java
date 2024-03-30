@@ -19,24 +19,17 @@ import static unet.kad4.utils.NodeUtils.unpackNodes;
 @Message(method = "find_node", type = MessageType.RSP_MSG)
 public class FindNodeResponse extends MethodMessageBase {
 
-    /*
-    * THIS CLASS COULD BE MADE MUCH BETTER BUT IT WORKS FOR NOW...
-    * */
-
     public static final int NODE_CAP = 20;
     private List<Node> nodes;
 
     public FindNodeResponse(byte[] tid){
-        super(tid);//, Method.FIND_NODE, Type.RSP_MSG);
+        super(tid);
         nodes = new ArrayList<>();
-        //ipv4Nodes = new ArrayList<>();
-        //ipv6Nodes = new ArrayList<>();
     }
 
     @Override
     public BencodeObject encode(){
         BencodeObject ben = super.encode();
-        //ben.getBencodeObject(message.type().innerKey()).put("target", target.getBytes());
 
         if(nodes.isEmpty()){
             return ben;
