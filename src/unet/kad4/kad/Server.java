@@ -212,15 +212,15 @@ public class Server {
                                 r.getMethod().invoke(r.getInstance(), event); //THROW ERROR - SEND ERROR MESSAGE
                             }
 
-                            if(event.isPreventDefault() || !event.hasResponse()){
+                            if(event.isPreventDefault()){
                                 return;
                             }
 
-                            send(event.getResponse());
-
-                            if(!kademlia.getRefreshHandler().isRunning()){
-                                kademlia.getRefreshHandler().start();
+                            if(!event.hasResponse()){
+                                throw new MessageException("Method Unknown", 204);
                             }
+
+                            send(event.getResponse());
 
                         }catch(MessageException e){
                             ErrorResponse response = new ErrorResponse(ben.getBytes(TID_KEY));
@@ -229,6 +229,10 @@ public class Server {
                             response.setCode(e.getCode());
                             response.setDescription(e.getMessage());
                             send(response);
+                        }
+
+                        if(!kademlia.getRefreshHandler().isRunning()){
+                            kademlia.getRefreshHandler().start();
                         }
                     }
                     break;
@@ -310,13 +314,10 @@ public class Server {
                             ErrorResponseEvent event;
 
                             if(call.hasNode()){
-                                if(!call.getNode().getUID().equals(m.getUID())){
-                                    throw new MessageException("Generic Error", 201);
-                                }
                                 event = new ErrorResponseEvent(m, call.getNode());
 
                             }else{
-                                event = new ErrorResponseEvent(m, new Node(m.getUID(), m.getOrigin()));
+                                event = new ErrorResponseEvent(m);
                             }
 
                             event.received();
@@ -377,7 +378,6 @@ public class Server {
         send(message);
     }
 
-    //DONT INIT EVERY TIME...
     private byte[] generateTransactionID(){
         byte[] tid = new byte[TID_LENGTH];
         random.nextBytes(tid);

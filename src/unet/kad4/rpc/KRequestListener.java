@@ -6,6 +6,9 @@ import unet.kad4.messages.PingResponse;
 import unet.kad4.routing.kb.KBucket;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.inter.RequestMapping;
+import unet.kad4.utils.Node;
+
+import java.util.List;
 
 public class KRequestListener extends RequestListener {
 
@@ -29,10 +32,15 @@ public class KRequestListener extends RequestListener {
 
         FindNodeRequest request = (FindNodeRequest) event.getMessage();
 
-        FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
-        response.setDestination(event.getMessage().getOrigin());
-        response.setPublic(event.getMessage().getOrigin());
-        response.addNodes(getRoutingTable().findClosest(request.getTarget(), KBucket.MAX_BUCKET_SIZE));
-        event.setResponse(response);
+        List<Node> nodes = getRoutingTable().findClosest(request.getTarget(), KBucket.MAX_BUCKET_SIZE);
+        nodes.remove(event.getNode());
+
+        if(!nodes.isEmpty()){
+            FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
+            response.setDestination(event.getMessage().getOrigin());
+            response.setPublic(event.getMessage().getOrigin());
+            response.addNodes(getRoutingTable().findClosest(request.getTarget(), KBucket.MAX_BUCKET_SIZE));
+            event.setResponse(response);
+        }
     }
 }
