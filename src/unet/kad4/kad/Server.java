@@ -239,7 +239,7 @@ public class Server {
 
                         try{
                             if(call == null){
-                                throw new MessageException("Server Unknown", 202);
+                                throw new MessageException("Server Error", 202);
                             }
 
                             MessageKey k = new MessageKey(((MethodMessageBase) call.getMessage()).getMethod(), t);
@@ -257,14 +257,14 @@ public class Server {
                             }
 
                             if(!call.getMessage().getDestination().equals(m.getOrigin())){
-                                throw new MessageException("Generic Unknown", 201);
+                                throw new MessageException("Generic Error", 201);
                             }
 
                             ResponseEvent event;
 
                             if(call.hasNode()){
                                 if(!call.getNode().getUID().equals(m.getUID())){
-                                    throw new MessageException("Generic Unknown", 201);
+                                    throw new MessageException("Generic Error", 201);
                                 }
                                 event = new ResponseEvent(m, call.getNode());
 
@@ -292,7 +292,7 @@ public class Server {
 
                         try{
                             if(call == null){
-                                throw new MessageException("Server Unknown", 202);
+                                throw new MessageException("Server Error", 202);
                             }
 
                             ErrorResponse m = new ErrorResponse(tid);
@@ -304,14 +304,14 @@ public class Server {
                             }
 
                             if(!call.getMessage().getDestination().equals(m.getOrigin())){
-                                throw new MessageException("Generic Unknown", 201);
+                                throw new MessageException("Generic Error", 201);
                             }
 
                             ErrorResponseEvent event;
 
                             if(call.hasNode()){
                                 if(!call.getNode().getUID().equals(m.getUID())){
-                                    throw new MessageException("Generic Unknown", 201);
+                                    throw new MessageException("Generic Error", 201);
                                 }
                                 event = new ErrorResponseEvent(m, call.getNode());
 
