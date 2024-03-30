@@ -109,11 +109,10 @@ public class MessageBase {
         return ben;
     }
 
-    public void decode(BencodeObject ben){//throws MessageException {
+    public void decode(BencodeObject ben)throws MessageException {
         if(!ben.containsKey(type.innerKey())){
-            //throw new MessageException("Request doesn't contain body", ErrorMessage.ErrorType.PROTOCOL);
+            throw new MessageException("Protocol Error, such as a malformed packet.", 203);
         }
-        //message.setVersion(ben.getDouble("v"));
     }
 
     @Override

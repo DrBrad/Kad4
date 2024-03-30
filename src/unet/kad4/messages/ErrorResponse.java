@@ -3,6 +3,7 @@ package unet.kad4.messages;
 import unet.bencode.variables.BencodeArray;
 import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.MessageBase;
+import unet.kad4.messages.inter.MessageException;
 import unet.kad4.messages.inter.MessageType;
 import unet.kad4.utils.net.AddressUtils;
 
@@ -48,19 +49,22 @@ public class ErrorResponse extends MessageBase {
     }
 
     @Override
-    public void decode(BencodeObject ben){
+    public void decode(BencodeObject ben)throws MessageException {
         super.decode(ben);
 
-        BencodeArray arr = ben.getBencodeArray(type.innerKey());
-        code = arr.getInteger(0);
-        description = arr.getString(1);
+        if(ben.getBencodeArray(type.innerKey()).size() < 2){
+            throw new MessageException("Protocol Error, such as a malformed packet.", 203);
+        }
+
+        code = ben.getBencodeArray(type.innerKey()).getInteger(0);
+        description = ben.getBencodeArray(type.innerKey()).getString(1);
     }
 
-    public void setErrorCode(int code){
+    public void setCode(int code){
         this.code = code;
     }
 
-    public int getErrorCode(){
+    public int getCode(){
         return code;
     }
 
@@ -68,7 +72,7 @@ public class ErrorResponse extends MessageBase {
         this.description = description;
     }
 
-    public String getErrorDescription(){
+    public String getDescription(){
         return description;
     }
 }

@@ -46,11 +46,11 @@ public class MethodMessageBase extends MessageBase {
     }
 
     @Override
-    public void decode(BencodeObject ben){
+    public void decode(BencodeObject ben)throws MessageException {
         super.decode(ben);
 
         if(!ben.getBencodeObject(type.innerKey()).containsKey("id")){
-            //throw new MessageException("Request doesn't contain UID", ErrorMessage.ErrorType.PROTOCOL);
+            throw new MessageException("Protocol Error, such as a malformed packet.", 203);
         }
 
         uid = new UID(ben.getBencodeObject(type.innerKey()).getBytes("id"));

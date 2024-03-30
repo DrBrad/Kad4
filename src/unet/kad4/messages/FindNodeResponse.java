@@ -2,6 +2,7 @@ package unet.kad4.messages;
 
 import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.Message;
+import unet.kad4.messages.inter.MessageException;
 import unet.kad4.messages.inter.MessageType;
 import unet.kad4.messages.inter.MethodMessageBase;
 import unet.kad4.utils.Node;
@@ -54,12 +55,12 @@ public class FindNodeResponse extends MethodMessageBase {
     }
 
     @Override
-    public void decode(BencodeObject ben){
+    public void decode(BencodeObject ben)throws MessageException {
         super.decode(ben);
 
         if(!ben.getBencodeObject(type.innerKey()).containsKey("nodes") &&
                 !ben.getBencodeObject(type.innerKey()).containsKey("nodes6")){
-            //throw new MessageException("Response to "+FIND_NODE+" did not contain 'node' or 'node6'", ErrorMessage.ErrorType.PROTOCOL);
+            throw new MessageException("Protocol Error, such as a malformed packet.", 203);
         }
 
         if(ben.getBencodeObject(type.innerKey()).containsKey("nodes")){
@@ -124,95 +125,4 @@ public class FindNodeResponse extends MethodMessageBase {
         }
         return r;
     }
-    /*
-    public void addNode(Node node){
-        if(node.getHostAddress() instanceof Inet4Address){
-            if(ipv4Nodes.size() > NODE_CAP){
-                throw new IllegalArgumentException("Node cap already reached, the node cap is "+NODE_CAP);
-            }
-
-            ipv4Nodes.add(node);
-            return;
-        }
-
-        if(ipv6Nodes.size() > NODE_CAP){
-            throw new IllegalArgumentException("Node cap already reached, the node cap is "+NODE_CAP);
-        }
-
-        ipv6Nodes.add(node);
-    }
-
-    public void addNodes(List<Node> nodes){
-        for(Node n : nodes){
-            if(n.getHostAddress() instanceof Inet4Address){
-                if(ipv4Nodes.size() < NODE_CAP){
-                    ipv4Nodes.add(n);
-                }
-                continue;
-            }
-
-            if(ipv6Nodes.size() < NODE_CAP){
-                ipv6Nodes.add(n);
-            }
-        }
-    }
-
-    public void addNodes(List<Node> nodes, AddressType type){
-        switch(type){
-            case IPv4:
-                ipv4Nodes.addAll(nodes);
-                break;
-
-            case IPv6:
-                ipv6Nodes.addAll(nodes);
-                break;
-        }
-    }
-
-    public boolean containsNode(Node node){
-        if(node.getHostAddress() instanceof Inet4Address){
-            return ipv4Nodes.contains(node);
-        }
-        return ipv6Nodes.contains(node);
-    }
-
-    public boolean removeNode(Node node){
-        if(node.getHostAddress() instanceof Inet4Address){
-            return ipv4Nodes.remove(node);
-        }
-        return ipv6Nodes.remove(node);
-    }
-
-    public List<Node> getIPv4Nodes(){
-        return ipv4Nodes;
-    }
-
-    public List<Node> getIPv6Nodes(){
-        return ipv6Nodes;
-    }
-
-    public List<Node> getAllNodes(){
-        List<Node> nodes = new ArrayList<>();
-        nodes.addAll(ipv4Nodes);
-        nodes.addAll(ipv6Nodes);
-        return nodes;
-    }
-    */
-
-    /*
-    @Override
-    public BencodeObject getBencode(){
-        BencodeObject ben = super.getBencode();
-
-        if(!ipv4Nodes.isEmpty()){
-            ben.getBencodeObject(t.innerKey()).put("nodes", packNodes(ipv4Nodes, AddressType.IPv4));
-        }
-
-        if(!ipv6Nodes.isEmpty()){
-            ben.getBencodeObject(t.innerKey()).put("nodes6", packNodes(ipv6Nodes, AddressType.IPv6));
-        }
-
-        return ben;
-    }
-    */
 }

@@ -2,6 +2,7 @@ package unet.kad4.messages;
 
 import unet.bencode.variables.BencodeObject;
 import unet.kad4.messages.inter.Message;
+import unet.kad4.messages.inter.MessageException;
 import unet.kad4.messages.inter.MessageType;
 import unet.kad4.messages.inter.MethodMessageBase;
 import unet.kad4.utils.UID;
@@ -26,10 +27,10 @@ public class FindNodeRequest extends MethodMessageBase {
     }
 
     @Override
-    public void decode(BencodeObject ben){
+    public void decode(BencodeObject ben)throws MessageException {
         super.decode(ben);
         if(!ben.getBencodeObject(type.innerKey()).containsKey("target")){
-            System.out.println("MISSING TARGET");
+            throw new MessageException("Protocol Error, such as a malformed packet.", 203);
         }
 
         target = new UID(ben.getBencodeObject(type.innerKey()).getBytes("target"));

@@ -74,7 +74,7 @@ public class Main {
 
             Kademlia k2 = new Kademlia();
             k2.getRoutingTable().setSecureOnly(false);
-            k2.join(6882, InetAddress.getLocalHost(), 6881);
+            k2.join(6882, InetAddress.getLoopbackAddress(), 6881);
 
 
 

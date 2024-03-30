@@ -16,7 +16,7 @@ public class GetPeersRequest extends MethodMessageBase {
     }
 
     @Override
-    public void decode(BencodeObject ben){
+    public void decode(BencodeObject ben)throws MessageException {
         super.decode(ben);
     }
 }
