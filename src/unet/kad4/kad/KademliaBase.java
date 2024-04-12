@@ -1,8 +1,5 @@
 package unet.kad4.kad;
 
-import unet.kad4.messages.inter.Message;
-import unet.kad4.messages.inter.MessageBase;
-import unet.kad4.messages.inter.MessageKey;
 import unet.kad4.refresh.RefreshHandler;
 import unet.kad4.routing.BucketTypes;
 import unet.kad4.routing.inter.RoutingTable;

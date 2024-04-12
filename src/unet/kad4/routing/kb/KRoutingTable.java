@@ -124,7 +124,6 @@ public class KRoutingTable extends RoutingTable {
 
         if(!uid.equals(n.getUID())){
             int id = getBucketUID(n.getUID());
-            //boolean containsIP = getAllNodes().contains(n);
 
             boolean containsIP = false;
             for(KBucket b : kBuckets){
@@ -136,76 +135,11 @@ public class KRoutingTable extends RoutingTable {
 
             boolean containsUID = kBuckets[id].containsUID(n);
 
-            //START WITH N BUCKET THEN THROUGH THE REST - DONT ADD TO LIST THEN LOOP - NO LIST...
-
             if(containsIP == containsUID){
                 kBuckets[id].insert(n);
             }
-            //EXACT MATCH ADD
-
-            //ETHER MATCH IGNORE
-
-            //NO MATCH ADD
         }
-
-
-        //WE NEED TO INCLUDE CACHE
-
-
-        /*
-        if(n.hasSecureID()){
-            if(!uid.equals(n.getUID())){
-                final int id = getBucketId(uid);
-                final boolean uidExists = kBuckets[id].containsUID(n),
-                        ipExists = Arrays.stream(kBuckets).anyMatch(k -> k.containsIP(n));
-
-                /.*
-                boolean ipExists = false;
-
-                for(KBucket b : kBuckets){
-                    if(b.containsIP(n)){
-                        ipExists = true;
-                        break;
-                    }
-                }
-                *./
-
-                if((ipExists && uidExists) || (!ipExists && !uidExists)){
-                    //ADD
-                }else{
-                    //UID COULD BE FINE AND IP CHANGED - IF THATS THE CASE UID IS INVALID - CANT REACH THIS POINT...
-                    //UID COULD BE FINE AND PORT CHANGED - IF THATS THE CASE MAYBE IGNORE NOT SURE...
-                    //UID CHANGED IP AND PORT FINE - IF THATS THE CASE THE NODE MAY BE RESTARTING OR CONSTANTLY CHANGING
-                    //                              DECIDE ON WHAT TO DO...
-
-                    //POSSIBLY IGNORE
-                }
-
-
-            }else{
-                //THIS IS US... SHOULDN'T HAPPEN
-            }
-        }else{
-            //INVALID ID
-        }
-
-        //CHECK IF ITS NOT ME... - KIND OF STUPID BUT NECISSARY
-            //CHECK IF UID IS VALID
-                //CHECK IF ARRAY CONTAINS IP+PORT && !UID MATCH
-                //CHECK OPPOSING
-                //ELSE
-        */
     }
-
-    /*
-    public synchronized List<Node> getAllNodes(){
-        ArrayList<Node> nodes = new ArrayList<>();
-        for(KBucket kBucket : kBuckets){
-            nodes.addAll(kBucket.getAllNodes());
-        }
-        return nodes;
-    }
-    */
 
     @Override
     public synchronized boolean hasQueried(Node node, long now){
@@ -232,46 +166,6 @@ public class KRoutingTable extends RoutingTable {
         return s+" - SIZE    "+c+"  - CACHE";
     }
 
-    /*
-    private LocalNode local;
-    private KBucket[] kBuckets;
-
-    public RoutingTable(int port){
-        local = (LocalNode) Node.getLocalNode(port);
-
-        kBuckets = new KBucket[UID.ID_LENGTH];
-        for(int i = 0; i < UID.ID_LENGTH; i++){
-            kBuckets[i] = new KBucket();
-        }
-    }
-
-    public LocalNode getLocal(){
-        return local;
-    }
-
-    public synchronized void add(Contact c){
-        if(!c.equals(local)){
-            for(KBucket kBucket : kBuckets){
-                if(kBucket.contains(c) && !kBucket.verify(c)){
-                    kBucket.removeSpoof(c);
-                    return;
-                }
-            }
-
-            kBuckets[getBucketId(c.getNode().getUID())].add(c);
-        }
-    }
-
-    public synchronized void add(Node n){
-        add(new Contact(n));
-    }
-
-    public synchronized int getBucketId(UID k){
-        int bid = local.getUID().getDistance(k)-1;
-        return bid < 0 ? 0 : bid;
-    }
-*/
-
     @Override
     public synchronized List<Node> getAllNodes(){
         List<Node> nodes = new ArrayList<>();
@@ -280,12 +174,6 @@ public class KRoutingTable extends RoutingTable {
         }
         return nodes;
     }
-
-    /*
-    public synchronized List<Contact> findClosest(){
-        return null;
-    }
-    */
 
     @Override
     public synchronized List<Node> findClosest(UID k, int r){
@@ -361,12 +249,4 @@ public class KRoutingTable extends RoutingTable {
             listener.onRestart();
         }
     }
-
-    /*
-    public synchronized int getBucketId(UID k){
-        int bid = local.getNode().getUID().getDistance(k)-1;
-        return bid < 0 ? 0 : bid;
-    }
-
-    */
 }

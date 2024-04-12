@@ -1,6 +1,5 @@
 package unet.kad4.refresh;
 
-import unet.kad4.Kademlia;
 import unet.kad4.kad.KademliaBase;
 import unet.kad4.refresh.tasks.inter.Task;
 
@@ -17,7 +16,6 @@ public class RefreshHandler {
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
     private List<Task> tasks;
-    //private long refreshTime = 30000;
     private long refreshTime = 3600000;
 
     public RefreshHandler(KademliaBase kademlia){
