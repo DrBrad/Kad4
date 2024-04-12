@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/DrBrad/Kad4/workflows/Build/badge.svg)](https://github.com/DrBrad/Kad4/actions?query=workflow%3ABuild)
+[![Gradle](https://github.com/DrBrad/Kad4/workflows/Publish/badge.svg)](https://github.com/DrBrad/Kad4/actions)
 
 # Kad4
 Kademlia DHT compatible with BitTorrent protocol that uses Java Reflect
