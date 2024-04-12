@@ -1,9 +1,6 @@
 package unet.kad4.example;
 
 import unet.kad4.Kademlia;
-import unet.kad4.messages.PingRequest;
-import unet.kad4.rpc.events.RequestEvent;
-import unet.kad4.utils.Node;
 
 import java.net.InetAddress;
 
