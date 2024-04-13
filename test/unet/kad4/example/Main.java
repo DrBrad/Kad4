@@ -84,15 +84,6 @@ public class Main {
                 Thread.sleep(10000);
                 System.out.println("CONSENSUS-1: "+k.getRoutingTable().getDerivedUID()+"  "+k.getRoutingTable().getConsensusExternalAddress().getHostAddress()+"  "+ k.getRoutingTable().getAllNodes().size());
                 System.out.println("CONSENSUS-2: "+k2.getRoutingTable().getDerivedUID()+"  "+k2.getRoutingTable().getConsensusExternalAddress().getHostAddress()+"  "+ k2.getRoutingTable().getAllNodes().size());
-
-                /*
-                PingRequest test = new PingRequest();
-                Node n = k.getRoutingTable().getAllNodes().get(5);
-                test.setDestination(n.getAddress());
-
-                RequestEvent event = new RequestEvent(test, n);
-                k.getServer().send(event);
-                */
             }
 
             //UID uid = k.getDHT().getUID();
