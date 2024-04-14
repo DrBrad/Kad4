@@ -99,27 +99,9 @@ public class UID {
         return bid;
     }
 
-    /*
-    public int getByte(int off){
-        return bid[off];
-    }
-    */
-
     public BigInteger getInt(){
         return new BigInteger(1, bid);
     }
-
-    /*
-    public int getInt(int offset) {
-        return Byte.toUnsignedInt(bid[offset]) << 24 |
-                Byte.toUnsignedInt(bid[offset+1]) << 16 |
-                Byte.toUnsignedInt(bid[offset+2]) << 8 |
-                Byte.toUnsignedInt(bid[offset+3]);
-    }
-    */
-
-
-
 
     public String getBinary(){
         StringBuilder sb = new StringBuilder();
@@ -135,8 +117,6 @@ public class UID {
     public String getHex(){
         return String.format("%0"+(bid.length << 1)+"X", new BigInteger(1, bid));
     }
-
-
 
     @Override
     public int hashCode(){

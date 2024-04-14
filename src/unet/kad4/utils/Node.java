@@ -13,8 +13,6 @@ public class Node {
 
     private UID uid;
     private InetSocketAddress address;
-    //protected InetAddress address;
-    //protected int port;
 
     private int stale;
     private long lastSeen;
@@ -59,8 +57,6 @@ public class Node {
         uid = new UID(bid);
     }
     */
-
-    //CREATE NODE BY HEX AS WELL...
 
     public Node(String uid, InetAddress address, int port){
         this(new UID(uid), new InetSocketAddress(address, port));
@@ -166,7 +162,6 @@ public class Node {
     public boolean equals(Object o){
         if(o instanceof Node){
             return hashCode() == o.hashCode();
-            //return address.equals(((Node) o).address) && port == ((Node) o).port;
         }
         return false;
     }
