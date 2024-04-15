@@ -4,6 +4,7 @@
 
 # Kad4
 Kademlia DHT compatible with BitTorrent protocol that uses Java Reflect
+- If your looking for a lower level version of this try [rKad4](https://github.com/DrBrad/rKad4) which is a version of this project made in Rust.
 
 Why / About
 -----
