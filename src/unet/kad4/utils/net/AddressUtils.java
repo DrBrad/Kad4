@@ -60,7 +60,7 @@ public class AddressUtils {
             if(address.getAddress()[0] == 0 || Arrays.equals(address.getAddress(), LOCAL_BROADCAST)){
                 return false;
             }
-        }else if(address instanceof Inet6Address){
+        }else{
             if((address.getAddress()[0] & 0xfe) == 0xfc || (V4_MAPPED.contains(address) || ((Inet6Address) address).isIPv4CompatibleAddress())){
                 return false;
             }
@@ -83,7 +83,7 @@ public class AddressUtils {
                     (byte) (address.getPort() & 0xff)
             };
 
-        }else if(address.getAddress() instanceof Inet6Address){
+        }else{
             return new byte[]{
                     buf[0],
                     buf[1],
@@ -109,8 +109,6 @@ public class AddressUtils {
                     (byte) (address.getPort() & 0xff)
             };
         }
-
-        return null;
     }
 
     public static InetSocketAddress unpackAddress(byte[] buf){

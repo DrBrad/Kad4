@@ -23,8 +23,8 @@ public class NetMask {
         }
     }
 
-    public boolean contains(InetAddress oAddress){
-        byte[] other = oAddress.getAddress();
+    public boolean contains(InetAddress otherAddress){
+        byte[] other = otherAddress.getAddress();
 
         if(address.length != other.length){
             return false;
