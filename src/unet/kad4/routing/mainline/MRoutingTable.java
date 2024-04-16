@@ -18,7 +18,7 @@ public class MRoutingTable extends RoutingTable {
 
     //TODO
 
-    private ArrayList<MBucket> mBuckets = new ArrayList<>();
+    private List<MBucket> mBuckets;
     private InetAddress consensusExternalAddress;
 
     public MRoutingTable(){
@@ -30,6 +30,7 @@ public class MRoutingTable extends RoutingTable {
 
         deriveUID();
 
+        mBuckets = new ArrayList<>();
         mBuckets.add(new MBucket()); //CLOSEST
         mBuckets.add(new MBucket()); //FURTHEST
     }

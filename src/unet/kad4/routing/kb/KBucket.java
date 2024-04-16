@@ -7,7 +7,7 @@ import java.util.List;
 
 public class KBucket {
 
-    private ArrayList<Node> nodes, cache;
+    private List<Node> nodes, cache;
     public static final int MAX_BUCKET_SIZE = 5, MAX_STALE_COUNT = 1;
 
     public KBucket(){

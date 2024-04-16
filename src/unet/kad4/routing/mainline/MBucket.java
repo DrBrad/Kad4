@@ -3,12 +3,13 @@ package unet.kad4.routing.mainline;
 import unet.kad4.utils.Node;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MBucket {
 
     //TODO
 
-    private ArrayList<Node> nodes;
+    private List<Node> nodes;
     public static final int MAX_BUCKET_SIZE = 5;
 
     public MBucket(){
@@ -37,7 +38,7 @@ public class MBucket {
         return nodes.size() > 4;
     }
 
-    public ArrayList<Node> list(){
+    public List<Node> list(){
         return nodes;
     }
 }
