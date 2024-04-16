@@ -54,6 +54,8 @@ public class Main {
 
     Bring bind back
     FindNodeResponse fix
+
+    Go back over the AddressUtil and clean it up...
     */
 
     public static void main(String[] args){
