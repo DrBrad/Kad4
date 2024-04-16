@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class AddressUtils {
 
-    private static final byte[] LOCAL_BROADCAST = new byte[] {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
+    private static final byte[] LOCAL_BROADCAST = new byte[]{ (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
     private static final NetMask V4_MAPPED;
 
     static {

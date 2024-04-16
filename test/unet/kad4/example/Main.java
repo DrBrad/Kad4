@@ -58,7 +58,6 @@ public class Main {
 
     public static void main(String[] args){
         try{
-
             Kademlia k = new Kademlia("Kademlia");
             //k.registerEventListener(ReceiverListener.class);
             //k.registerMessage(GetPeersRequest.class);
