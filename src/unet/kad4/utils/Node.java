@@ -155,7 +155,7 @@ public class Node {
 
     @Override
     public int hashCode(){
-        return address.hashCode()+address.getPort();
+        return address.hashCode();
     }
 
     @Override
