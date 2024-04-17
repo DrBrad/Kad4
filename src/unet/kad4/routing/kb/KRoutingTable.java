@@ -152,8 +152,8 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized int getBucketUID(UID k){
-        int bid = uid.getDistance(k)-1;
-        return bid < 0 ? 0 : bid;
+        int id = uid.getDistance(k)-1;
+        return id < 0 ? 0 : id;
     }
 
     @Override
