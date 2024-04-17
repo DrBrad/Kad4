@@ -143,11 +143,11 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized boolean hasQueried(Node node, long now){
-        int bid = getBucketUID(node.getUID());
-        if(!kBuckets[bid].containsUID(node)){
+        int id = getBucketUID(node.getUID());
+        if(!kBuckets[id].containsUID(node)){
             return false;
         }
-        return kBuckets[bid].hasQueried(node, now);
+        return kBuckets[id].hasQueried(node, now);
     }
 
     @Override
