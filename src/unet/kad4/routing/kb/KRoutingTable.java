@@ -38,8 +38,8 @@ public class KRoutingTable extends RoutingTable {
 
         deriveUID();
 
-        kBuckets = new KBucket[UID.ID_LENGTH];
-        for(int i = 0; i < UID.ID_LENGTH; i++){
+        kBuckets = new KBucket[UID.ID_LENGTH*8];
+        for(int i = 0; i < UID.ID_LENGTH*8; i++){
             kBuckets[i] = new KBucket();
         }
     }
@@ -232,8 +232,8 @@ public class KRoutingTable extends RoutingTable {
     public synchronized void restart(){
         List<Node> nodes = getAllNodes();
 
-        kBuckets = new KBucket[UID.ID_LENGTH];
-        for(int i = 0; i < UID.ID_LENGTH; i++){
+        kBuckets = new KBucket[UID.ID_LENGTH*8];
+        for(int i = 0; i < UID.ID_LENGTH*8; i++){
             kBuckets[i] = new KBucket();
         }
 
