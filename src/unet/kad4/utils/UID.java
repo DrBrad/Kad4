@@ -33,7 +33,7 @@ public class UID {
 
 
     public int getDistance(UID k){
-        return ID_LENGTH-xor(k).getFirstSetBitIndex();
+        return (ID_LENGTH*8)-xor(k).getFirstSetBitIndex();
     }
 
     //COMPARE MATCHES
