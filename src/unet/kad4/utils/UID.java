@@ -33,15 +33,15 @@ public class UID {
 
 
     public int getDistance(UID k){
-        return (ID_LENGTH*8)-xor(k).getFirstSetBitIndex();
+        return (ID_LENGTH*8)-xor(k.bid).getFirstSetBitIndex();
     }
 
     //COMPARE MATCHES
-    public UID xor(UID k){
+    public UID xor(byte[] k){
         byte[] distance = new byte[ID_LENGTH];
 
         for(int i = 0; i < ID_LENGTH; i++){
-            distance[i] = (byte) (bid[i]^k.getBytes()[i]);
+            distance[i] = (byte) (bid[i]^k[i]);
         }
         return new UID(distance);
     }
@@ -79,20 +79,23 @@ public class UID {
             result[i] = 0;
         }
 
-        BitSet bits = new BitSet(8);
-        bits.set(0, 8);
+        boolean[] bits = new boolean[8];
 
-        for(int i = 0; i < numBitZeroes; i++){
-            bits.clear(i);
+        for(int i = 0; i < bits.length; i++){
+            bits[i] = !(i < numBitZeroes);
         }
-        bits.flip(0, 8);
-        result[numByteZeroes] = bits.toByteArray()[0];
 
-        for(int i = numByteZeroes+1; i < result.length; i++){
+        for(int i = 0; i < 8; i++){
+            if (bits[i]) {
+                result[numByteZeroes] |= 1 << (7 - i);
+            }
+        }
+
+        for(int i = numByteZeroes + 1; i < ID_LENGTH; i++){
             result[i] = Byte.MAX_VALUE;
         }
 
-        return xor(new UID(result));
+        return xor(result);
     }
 
     public byte[] getBytes(){
