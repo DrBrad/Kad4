@@ -168,8 +168,8 @@ public class KRoutingTable extends RoutingTable {
     @Override
     public synchronized List<Node> getAllNodes(){
         List<Node> nodes = new ArrayList<>();
-        for(KBucket kBucket : kBuckets){
-            nodes.addAll(kBucket.getAllNodes());
+        for(KBucket b : kBuckets){
+            nodes.addAll(b.getAllNodes());
         }
         return nodes;
     }
