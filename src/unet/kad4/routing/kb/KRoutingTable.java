@@ -152,7 +152,7 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized int getBucketUID(UID k){
-        return uid.getDistance(k);
+        return uid.getDistance(k)-1;
     }
 
     @Override
