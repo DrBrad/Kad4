@@ -217,14 +217,14 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized List<Node> getAllUnqueriedNodes(){
-        List<Node> contacts = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
         long now = System.currentTimeMillis();
 
         for(KBucket b : kBuckets){
-            contacts.addAll(b.getUnQueriedNodes(now));
+            nodes.addAll(b.getUnQueriedNodes(now));
         }
 
-        return contacts;
+        return nodes;
     }
 
     @Override
