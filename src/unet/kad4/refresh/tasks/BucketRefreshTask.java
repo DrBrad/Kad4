@@ -24,7 +24,7 @@ public class BucketRefreshTask extends Task {
         FindNodeResponseListener listener = new FindNodeResponseListener();
         System.out.println("EXECUTING BUCKET REFRESH");
 
-        for(int i = 1; i < UID.ID_LENGTH; i++){
+        for(int i = 1; i < UID.ID_LENGTH*8; i++){
             if(getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
                 UID k = getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
 

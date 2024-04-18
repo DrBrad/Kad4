@@ -102,7 +102,6 @@ public class KRoutingTable extends RoutingTable {
         c.update(ip, 0, ip.length);
         int crc = (int) c.getValue();
 
-        // idk about this stuff below
         byte[] bid = new byte[UID.ID_LENGTH];
         bid[0] = (byte) ((crc >> 24) & 0xFF);
         bid[1] = (byte) ((crc >> 16) & 0xFF);
@@ -152,8 +151,7 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized int getBucketUID(UID k){
-        int id = uid.getDistance(k)-1;
-        return id < 0 ? 0 : id;
+        return uid.getDistance(k)-1;
     }
 
     @Override
@@ -169,8 +167,8 @@ public class KRoutingTable extends RoutingTable {
     @Override
     public synchronized List<Node> getAllNodes(){
         List<Node> nodes = new ArrayList<>();
-        for(KBucket kBucket : kBuckets){
-            nodes.addAll(kBucket.getAllNodes());
+        for(KBucket b : kBuckets){
+            nodes.addAll(b.getAllNodes());
         }
         return nodes;
     }
@@ -218,14 +216,14 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized List<Node> getAllUnqueriedNodes(){
-        List<Node> contacts = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
         long now = System.currentTimeMillis();
 
         for(KBucket b : kBuckets){
-            contacts.addAll(b.getUnQueriedNodes(now));
+            nodes.addAll(b.getUnQueriedNodes(now));
         }
 
-        return contacts;
+        return nodes;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package unet.kad4.example;
 
 import unet.kad4.Kademlia;
+import unet.kad4.utils.UID;
 
 import java.net.InetAddress;
 
@@ -56,6 +57,8 @@ public class Main {
     FindNodeResponse fix
 
     Go back over the AddressUtil and clean it up...
+
+    - fix issue with 160 max -- unsure what to do with this one...
     */
 
     public static void main(String[] args){
