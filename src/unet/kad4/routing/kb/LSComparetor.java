@@ -8,13 +8,6 @@ public class LSComparetor implements Comparator<Node> {
 
     @Override
     public int compare(Node a, Node b){
-        return (a.hashCode() == b.hashCode()) ? 0 : (a.getLastSeen() > b.getLastSeen()) ? 1 : -1;
-        /*
-        if(a.hashCode() == (b.hashCode())){
-            return (a.hashCode() == b.hashCode()) ? 0 : (a.getLastSeen() > b.getLastSeen()) ? 1 : -1;
-        }else{
-            return (a.getLastSeen() > b.getLastSeen()) ? 1 : -1;
-        }
-        */
+        return (a.equals(b)) ? 0 : (a.getLastSeen() > b.getLastSeen()) ? 1 : -1;
     }
 }
