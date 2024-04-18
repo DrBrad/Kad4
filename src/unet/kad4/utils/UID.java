@@ -73,7 +73,7 @@ public class UID {
         byte[] result = new byte[ID_LENGTH];
 
         int numByteZeroes = ((ID_LENGTH*8)-distance)/8;
-        int numBitZeroes = 8-(distance%8);
+        int numBitZeroes = (8-distance%8)%8;
 
         for(int i = 0; i < numByteZeroes; i++){
             result[i] = 0;
@@ -86,7 +86,7 @@ public class UID {
         }
 
         for(int i = 0; i < 8; i++){
-            if (bits[i]) {
+            if(bits[i]){
                 result[numByteZeroes] |= 1 << (7 - i);
             }
         }
