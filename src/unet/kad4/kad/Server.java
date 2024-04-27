@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static unet.kad4.messages.inter.MessageBase.TID_KEY;
 
@@ -41,6 +42,7 @@ public class Server {
 
     private SecureRandom random;
     protected ResponseTracker tracker;
+    protected ConcurrentLinkedQueue<DatagramPacket> receiverPool;
     protected Map<String, List<ReflectMethod>> requestMapping;
     protected Map<MessageKey, Constructor<?>> messages;
 
@@ -48,6 +50,7 @@ public class Server {
         this.kademlia = kademlia;
         tracker = new ResponseTracker();
 
+        receiverPool = new ConcurrentLinkedQueue<>();
         requestMapping = new HashMap<>();
         messages = new HashMap<>();
 
@@ -76,16 +79,22 @@ public class Server {
                         server.receive(packet);
 
                         if(packet != null){
-                            new Thread(new Runnable(){
-                                @Override
-                                public void run(){
-                                    onReceive(packet);
-                                    tracker.removeStalled();
-                                }
-                            }).start();
+                            receiverPool.offer(packet);
                         }
                     }catch(IOException e){
                         e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                while(!server.isClosed()){
+                    if(!receiverPool.isEmpty()){
+                        onReceive(receiverPool.poll());
+                        tracker.removeStalled();
                     }
                 }
             }
