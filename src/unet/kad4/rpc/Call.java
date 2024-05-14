@@ -40,10 +40,6 @@ public class Call {
         return node;
     }
 
-    public boolean hasResponseCallback(){
-        return (callback != null);
-    }
-
     public ResponseCallback getResponseCallback(){
         return callback;
     }

@@ -63,16 +63,14 @@ public class ResponseTracker {
             calls.remove(tid);
             System.err.println("STALLED "+((call.hasNode()) ? call.getNode() : ""));
 
-            if(call.hasResponseCallback()){
-                StalledEvent event = new StalledEvent(call.getMessage());
-                event.setSentTime(call.getSentTime());
+            StalledEvent event = new StalledEvent(call.getMessage());
+            event.setSentTime(call.getSentTime());
 
-                if(call.hasNode()){
-                    event.setNode(call.getNode());
-                }
-
-                call.getResponseCallback().onStalled(event);
+            if(call.hasNode()){
+                event.setNode(call.getNode());
             }
+
+            call.getResponseCallback().onStalled(event);
         }
     }
 }

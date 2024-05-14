@@ -154,8 +154,8 @@ public class Server {
     }
 
     public void registerMessage(Class<?> c)throws NoSuchMethodException {
-        if(!MessageBase.class.isAssignableFrom(c)){
-            throw new IllegalArgumentException("Class doesn't extend 'MessageBase' class");
+        if(!MethodMessageBase.class.isAssignableFrom(c)){
+            throw new IllegalArgumentException("Class doesn't extend 'MethodMessageBase' class");
         }
 
         if(!c.isAnnotationPresent(Message.class)){
@@ -289,9 +289,7 @@ public class Server {
                             event.setSentTime(call.getSentTime());
                             event.setRequest(call.getMessage());
 
-                            if(call.hasResponseCallback()){
-                                call.getResponseCallback().onResponse(event);
-                            }
+                            call.getResponseCallback().onResponse(event);
 
                         }catch(MessageException e){
                             e.printStackTrace();
@@ -333,9 +331,7 @@ public class Server {
                             event.setSentTime(call.getSentTime());
                             event.setRequest(call.getMessage());
 
-                            if(call.hasResponseCallback()){
-                                call.getResponseCallback().onErrorResponse(event);
-                            }
+                            call.getResponseCallback().onErrorResponse(event);
 
                         }catch(MessageException e){
                             e.printStackTrace();
