@@ -1,6 +1,6 @@
 package unet.kad4.rpc;
 
-import unet.kad4.messages.inter.MessageBase;
+import unet.kad4.messages.inter.MethodMessageBase;
 import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.Node;
 
@@ -8,23 +8,23 @@ import static unet.kad4.rpc.ResponseTracker.STALLED_TIME;
 
 public class Call {
 
-    private MessageBase message;
+    private MethodMessageBase message;
     private Node node;
     private ResponseCallback callback;
     protected long sentTime;
 
-    public Call(MessageBase message, ResponseCallback callback){
+    public Call(MethodMessageBase message, ResponseCallback callback){
         this.message = message;
         this.callback = callback;
         sentTime = System.currentTimeMillis();
     }
 
-    public Call(MessageBase message, Node node, ResponseCallback callback){
+    public Call(MethodMessageBase message, Node node, ResponseCallback callback){
         this(message, callback);
         this.node = node;
     }
 
-    public MessageBase getMessage(){
+    public MethodMessageBase getMessage(){
         return message;
     }
 
