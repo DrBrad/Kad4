@@ -363,7 +363,7 @@ public class Server {
         server.send(new DatagramPacket(data, 0, data.length, message.getDestination()));
     }
 
-    public void send(MessageBase message, ResponseCallback callback)throws IOException {
+    public void send(MethodMessageBase message, ResponseCallback callback)throws IOException {
         if(message.getType() != MessageType.REQ_MSG){
             send(message);
         }
@@ -374,7 +374,7 @@ public class Server {
         send(message);
     }
 
-    public void send(MessageBase message, Node node, ResponseCallback callback)throws IOException {
+    public void send(MethodMessageBase message, Node node, ResponseCallback callback)throws IOException {
         if(message.getType() != MessageType.REQ_MSG){
             send(message);
         }
