@@ -94,8 +94,9 @@ public class Server {
                 while(!server.isClosed()){
                     if(!receiverPool.isEmpty()){
                         onReceive(receiverPool.poll());
-                        tracker.removeStalled();
                     }
+
+                    tracker.removeStalled();
                 }
             }
         }).start();
