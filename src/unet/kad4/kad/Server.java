@@ -256,7 +256,7 @@ public class Server {
                                 throw new MessageException("Server Error", 202);
                             }
 
-                            MessageKey k = new MessageKey(((MethodMessageBase) call.getMessage()).getMethod(), t);
+                            MessageKey k = new MessageKey(call.getMessage().getMethod(), t);
 
                             if(!messages.containsKey(k)){
                                 throw new MessageException("Method Unknown", 204);
