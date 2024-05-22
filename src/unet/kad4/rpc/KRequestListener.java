@@ -39,7 +39,7 @@ public class KRequestListener extends RequestListener {
             FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
             response.setDestination(event.getMessage().getOrigin());
             response.setPublic(event.getMessage().getOrigin());
-            response.addNodes(getRoutingTable().findClosest(request.getTarget(), KBucket.MAX_BUCKET_SIZE));
+            response.addNodes(nodes);
             event.setResponse(response);
         }
     }
