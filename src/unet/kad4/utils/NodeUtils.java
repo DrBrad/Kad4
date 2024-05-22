@@ -42,6 +42,10 @@ public class NodeUtils {
         int port;
 
         while(position < buf.length){
+            if(position + ID_LENGTH + addr.length + 2 > buf.length){
+                break;
+            }
+
             System.arraycopy(buf, position, bid, 0, bid.length);
             position += bid.length;
 

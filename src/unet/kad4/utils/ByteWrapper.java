@@ -5,11 +5,9 @@ import java.util.Arrays;
 public class ByteWrapper {
 
     private final byte[] b;
-    private final int h;
 
     public ByteWrapper(byte[] b){
         this.b = b;
-        h = Arrays.hashCode(b);
     }
 
     public byte[] getBytes(){
@@ -18,7 +16,7 @@ public class ByteWrapper {
 
     @Override
     public int hashCode(){
-        return h;
+        return Arrays.hashCode(b);
     }
 
     @Override

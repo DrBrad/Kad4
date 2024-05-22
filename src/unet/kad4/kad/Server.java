@@ -367,6 +367,7 @@ public class Server {
     public void send(MethodMessageBase message, ResponseCallback callback)throws IOException {
         if(message.getType() != MessageType.REQ_MSG){
             send(message);
+            return;
         }
 
         byte[] tid = generateTransactionID();
@@ -378,6 +379,7 @@ public class Server {
     public void send(MethodMessageBase message, Node node, ResponseCallback callback)throws IOException {
         if(message.getType() != MessageType.REQ_MSG){
             send(message);
+            return;
         }
 
         byte[] tid = generateTransactionID();

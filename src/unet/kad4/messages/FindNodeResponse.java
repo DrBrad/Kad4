@@ -44,6 +44,7 @@ public class FindNodeResponse extends MethodMessageBase {
         if(!nodes.isEmpty()){
             ben.getBencodeObject(type.innerKey()).put("nodes6", packNodes(nodes, AddressType.IPv6));
         }
+
         return ben;
     }
 
