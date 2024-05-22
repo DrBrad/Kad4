@@ -8,6 +8,7 @@ import unet.kad4.rpc.events.ResponseEvent;
 import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.rpc.events.inter.ResponseCallback;
 import unet.kad4.utils.Node;
+import unet.kad4.utils.UID;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,8 +34,12 @@ public class JoinNodeListener extends ResponseCallback {
             PingResponseListener listener = new PingResponseListener(kademlia.getRoutingTable());
 
             long now = System.currentTimeMillis();
+            UID uid = kademlia.getRoutingTable().getDerivedUID();
+
             for(Node n : nodes){
-                if((kademlia.getRoutingTable().isSecureOnly() && !n.hasSecureID()) || n.hasQueried(now)){
+                if(uid.equals(n.getUID()) ||
+                        (kademlia.getRoutingTable().isSecureOnly() && !n.hasSecureID()) ||
+                        n.hasQueried(now)){
                     System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
                     continue;
                 }

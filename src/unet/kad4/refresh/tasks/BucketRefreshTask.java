@@ -69,8 +69,12 @@ public class BucketRefreshTask extends Task {
                 List<Node> nodes = response.getAllNodes();
 
                 long now = System.currentTimeMillis();
+                UID uid = getRoutingTable().getDerivedUID();
+
                 for(int i = nodes.size()-1; i > -1; i--){
-                    if(queries.contains(nodes.get(i)) || getRoutingTable().hasQueried(nodes.get(i), now)){
+                    if(uid.equals(nodes.get(i).getUID()) ||
+                            queries.contains(nodes.get(i)) ||
+                            getRoutingTable().hasQueried(nodes.get(i), now)){
                         nodes.remove(nodes.get(i));
                     }
                 }
