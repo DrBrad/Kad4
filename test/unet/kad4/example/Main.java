@@ -17,7 +17,6 @@ public class Main {
             k2.getRoutingTable().setSecureOnly(false);
             k2.join(8075, InetAddress.getLoopbackAddress(), 8070);
 
-
             while(true){
                 Thread.sleep(10000);
                 System.out.println("CONSENSUS-1: "+k.getRoutingTable().getDerivedUID()+"  "+k.getRoutingTable().getConsensusExternalAddress().getHostAddress()+"  "+k.getRoutingTable().getAllNodes().size());
