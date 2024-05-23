@@ -10,11 +10,13 @@ public class Main {
         try{
             Kademlia k = new Kademlia("Kademlia");
             k.getRoutingTable().setSecureOnly(false);
+            k.getServer().setAllowBogon(true);
             //k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
             k.bind(8070);
 
             Kademlia k2 = new Kademlia();
             k2.getRoutingTable().setSecureOnly(false);
+            k2.getServer().setAllowBogon(true);
             k2.join(8075, InetAddress.getLoopbackAddress(), 8070);
 
             while(true){

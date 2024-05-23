@@ -41,6 +41,7 @@ public class Server {
     protected DatagramSocket server;
 
     private SecureRandom random;
+    private boolean allowBogon;
     protected ResponseTracker tracker;
     protected ConcurrentLinkedQueue<DatagramPacket> receiverPool;
     protected Map<String, List<ReflectMethod>> requestMapping;
@@ -171,12 +172,20 @@ public class Server {
         return (server != null && !server.isClosed());
     }
 
+    public boolean isAllowBogon(){
+        return allowBogon;
+    }
+
+    public void setAllowBogon(boolean allowBogon){
+        this.allowBogon = allowBogon;
+    }
+
     public int getPort(){
         return (server != null) ? server.getLocalPort() : 0;
     }
 
     protected void onReceive(DatagramPacket packet){
-        if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
+        if(!allowBogon && AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
         }
 
@@ -352,7 +361,7 @@ public class Server {
             throw new IllegalArgumentException("Message destination set to null");
         }
 
-        if(AddressUtils.isBogon(message.getDestination())){
+        if(!allowBogon && AddressUtils.isBogon(message.getDestination())){
             throw new IllegalArgumentException("Message destination set to bogon");
         }
 
