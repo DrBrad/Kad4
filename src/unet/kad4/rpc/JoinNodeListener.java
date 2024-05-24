@@ -45,6 +45,7 @@ public class JoinNodeListener extends ResponseCallback {
                 }
 
                 PingRequest req = new PingRequest();
+                req.setUID(kademlia.getRoutingTable().getDerivedUID());
                 req.setDestination(n.getAddress());
                 try{
                     kademlia.getServer().send(req, n, listener);

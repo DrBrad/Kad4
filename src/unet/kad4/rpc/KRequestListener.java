@@ -19,6 +19,7 @@ public class KRequestListener extends RequestListener {
         }
 
         PingResponse response = new PingResponse(event.getMessage().getTransactionID());
+        response.setUID(getRoutingTable().getDerivedUID());
         response.setDestination(event.getMessage().getOrigin());
         response.setPublic(event.getMessage().getOrigin());
         event.setResponse(response);
@@ -37,6 +38,7 @@ public class KRequestListener extends RequestListener {
 
         if(!nodes.isEmpty()){
             FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
+            response.setUID(getRoutingTable().getDerivedUID());
             response.setDestination(event.getMessage().getOrigin());
             response.setPublic(event.getMessage().getOrigin());
             response.addNodes(nodes);

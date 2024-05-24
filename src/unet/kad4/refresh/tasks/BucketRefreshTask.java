@@ -35,6 +35,7 @@ public class BucketRefreshTask extends Task {
 
                 for(Node n : closest){
                     FindNodeRequest request = new FindNodeRequest();
+                    request.setUID(getRoutingTable().getDerivedUID());
                     request.setDestination(n.getAddress());
                     request.setTarget(k);
 
@@ -88,6 +89,7 @@ public class BucketRefreshTask extends Task {
                     }
 
                     PingRequest req = new PingRequest();
+                    req.setUID(getRoutingTable().getDerivedUID());
                     req.setDestination(n.getAddress());
                     try{
                         getServer().send(req, n, listener);

@@ -243,13 +243,8 @@ public class KRoutingTable extends RoutingTable {
             return;
         }
 
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                for(RestartListener listener : listeners){
-                    listener.onRestart();
-                }
-            }
-        }).start();
+        for(RestartListener listener : listeners){
+            listener.onRestart();
+        }
     }
 }
