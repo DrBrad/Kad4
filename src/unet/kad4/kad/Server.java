@@ -365,6 +365,10 @@ public class Server {
             throw new IllegalArgumentException("Message destination set to bogon");
         }
 
+        if(message.getUID() == null && message.getType() != MessageType.ERR_MSG){
+            message.setUID(kademlia.getRoutingTable().getDerivedUID());
+        }
+
         byte[] data = message.encode().encode();
         server.send(new DatagramPacket(data, 0, data.length, message.getDestination()));
     }

@@ -17,7 +17,6 @@ public class StaleRefreshTask extends Task {
 
         for(Node node : nodes){
             PingRequest request = new PingRequest();
-            request.setUID(getRoutingTable().getDerivedUID());
             request.setDestination(node.getAddress());
 
             try{

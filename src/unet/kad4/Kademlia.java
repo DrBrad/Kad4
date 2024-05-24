@@ -59,7 +59,6 @@ public class Kademlia extends KademliaBase {
         super.join(localPort, address);
 
         FindNodeRequest request = new FindNodeRequest();
-        request.setUID(getRoutingTable().getDerivedUID());
         request.setDestination(address);
         request.setTarget(routingTable.getDerivedUID());
         server.send(request, new JoinNodeListener(this));
