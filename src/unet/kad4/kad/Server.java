@@ -365,7 +365,7 @@ public class Server {
             throw new IllegalArgumentException("Message destination set to bogon");
         }
 
-        if(message.getUID() == null && message.getType() != MessageType.ERR_MSG){
+        if(message.getType() != MessageType.ERR_MSG){
             message.setUID(kademlia.getRoutingTable().getDerivedUID());
         }
 
