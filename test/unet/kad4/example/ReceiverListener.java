@@ -1,6 +1,5 @@
 package unet.kad4.example;
 
-import unet.kad4.messages.PingResponse;
 import unet.kad4.rpc.RequestListener;
 import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.inter.RequestMapping;
