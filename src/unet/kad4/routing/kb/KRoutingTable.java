@@ -26,10 +26,6 @@ public class KRoutingTable extends RoutingTable {
     };
 
     public KRoutingTable(){
-        //uid = new UID(new byte[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
-        //use UPnP to attempt getting IP
-        //If fails go to fall back method...
-        //We need to somehow allow the refresh to derive our ID...
         try{
             consensusExternalAddress = Inet4Address.getLocalHost();
         }catch(UnknownHostException e){
@@ -69,7 +65,6 @@ public class KRoutingTable extends RoutingTable {
                 //CHANGE - TO AUTO UPDATE UID BASED OFF OF IP CONSENSUS CHANGES
                 if(!consensusExternalAddress.equals(k.get(res))){
                     consensusExternalAddress = k.get(res);
-                    deriveUID();
                     restart();
                 }
 
@@ -228,6 +223,8 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public synchronized void restart(){
+        deriveUID();
+
         List<Node> nodes = getAllNodes();
 
         kBuckets = new KBucket[UID.ID_LENGTH*8];
