@@ -1,6 +1,5 @@
 package unet.kad4.rpc;
 
-import unet.kad4.rpc.events.RequestEvent;
 import unet.kad4.rpc.events.StalledEvent;
 import unet.kad4.utils.ByteWrapper;
 
@@ -14,13 +13,9 @@ public class ResponseTracker {
 
     public static final long STALLED_TIME = 60000;
     private final LinkedHashMap<ByteWrapper, Call> calls;
-    //private final ConcurrentHashMap<ByteWrapper, RequestEvent> calls;
-    //private final ConcurrentLinkedQueue<ByteWrapper> callsOrder;
 
     public ResponseTracker(){
         calls = new LinkedHashMap<>(MAX_ACTIVE_CALLS);
-        //calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
-        //callsOrder = new ConcurrentLinkedQueue<>();
     }
 
     public synchronized void add(ByteWrapper tid, Call call){
