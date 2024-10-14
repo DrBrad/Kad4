@@ -98,6 +98,11 @@ public class Server {
                     }
 
                     tracker.removeStalled();
+                    try{
+                        Thread.sleep(1);
+                    }catch(InterruptedException e){
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
