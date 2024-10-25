@@ -1,9 +1,5 @@
 package unet.kad4.messages.inter;
 
-import unet.kad4.utils.ByteWrapper;
-
-import java.util.Arrays;
-
 public class MessageKey {
 
     private String method;

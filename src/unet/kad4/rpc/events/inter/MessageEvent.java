@@ -3,8 +3,6 @@ package unet.kad4.rpc.events.inter;
 import unet.kad4.messages.inter.MessageBase;
 import unet.kad4.utils.Node;
 
-import static unet.kad4.rpc.ResponseTracker.STALLED_TIME;
-
 public class MessageEvent extends Event {
 
     protected MessageBase message;
