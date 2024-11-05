@@ -17,42 +17,44 @@ public class SpamThrottle {
         lastDecayTime = new AtomicLong(System.currentTimeMillis());
     }
 
-    public boolean addAndTest(InetAddress addr) {
+    public boolean addAndTest(InetAddress addr){
         return (saturatingAdd(addr) >= BURST);
     }
 
-    public void remove(InetAddress addr) {
+    public void remove(InetAddress addr){
         hitCounter.remove(addr);
     }
 
-    public boolean test(InetAddress addr) {
+    public boolean test(InetAddress addr){
         return hitCounter.getOrDefault(addr, 0) >= BURST;
     }
 
-    public int calculateDelayAndAdd(InetAddress addr) {
-        int counter = hitCounter.compute(addr, (key, old) -> old == null ? 1 : old + 1);
+    public int calculateDelayAndAdd(InetAddress addr){
+        int counter = hitCounter.compute(addr, (key, old) -> old == null ? 1 : old+1);
         int diff = counter - BURST;
         return Math.max(diff, 0)*1000/PER_SECOND;
     }
 
-    public void saturatingDec(InetAddress addr) {
-        hitCounter.compute(addr, (key, old) -> old == null || old == 1 ? null : old - 1);
+    public void saturatingDec(InetAddress addr){
+        hitCounter.compute(addr, (key, old) -> old == null || old == 1 ? null : old-1);
     }
 
-    public int saturatingAdd(InetAddress addr) {
-        return hitCounter.compute(addr, (key, old) -> old == null ? 1 : Math.min(old + 1, BURST));
+    public int saturatingAdd(InetAddress addr){
+        return hitCounter.compute(addr, (key, old) -> old == null ? 1 : Math.min(old+1, BURST));
     }
 
-    public void decay() {
+    public void decay(){
         long now = System.currentTimeMillis();
         long last = lastDecayTime.get();
-        long deltaT = TimeUnit.MILLISECONDS.toSeconds(now - last);
-        if(deltaT < 1)
+        long deltaT = TimeUnit.MILLISECONDS.toSeconds(now-last);
+        if(deltaT < 1){
             return;
-        if(!lastDecayTime.compareAndSet(last, last + deltaT * 1000))
+        }
+        if(!lastDecayTime.compareAndSet(last, last+deltaT*1000)){
             return;
+        }
 
-        int deltaC = (int) (deltaT * PER_SECOND);
+        int deltaC = (int) (deltaT*PER_SECOND);
 
         // minor optimization: delete first, then replace only what's left
         hitCounter.entrySet().removeIf(entry -> entry.getValue() <= deltaC);
